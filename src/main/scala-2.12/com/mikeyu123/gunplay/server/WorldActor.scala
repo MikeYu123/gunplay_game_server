@@ -11,7 +11,7 @@ case class AddPlayer(uuid: String, x: Double, y: Double)
 case class UpdateControls(uuid: String, velocity: Vector, angle: Double)
 case object Step
 case class PublishUpdates(bodies: Set[Body], bullets: Set[Bullet])
-case class RegisterClient(uuid: String)
+case object RegisterClient
 
 class WorldActor(var world: World) extends Actor {
   def this() = this(World(Set[Body](), Set[Bullet](), Set[Wall](), Set[Door]()))
@@ -30,7 +30,7 @@ class WorldActor(var world: World) extends Actor {
     case Terminated(client) =>
       clients -= client
 //      TODO don't know whether we need UUIDs here
-    case RegisterClient(uuid) =>
+    case RegisterClient =>
       val sender = sender()
       clients += sender
       context.watch(sender)

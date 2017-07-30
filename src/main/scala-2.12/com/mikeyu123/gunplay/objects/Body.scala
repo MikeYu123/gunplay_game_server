@@ -19,6 +19,8 @@ object Body {
     )
     Body(uuid, GraphicsObject(rectangle, Point(x, y)), Vector(0d, 0d), 0d)
   }
+
+  def initBody(uuid: String, point: Point): Body = initBody(uuid, point.x, point.y)
 }
 case class Body(uuid: String, graphicsObject: GraphicsObject, velocity: Vector, angle: Double) {
 

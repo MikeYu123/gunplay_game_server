@@ -22,7 +22,8 @@ class BulletSpec extends FlatSpec with Matchers with TestUtils {
         ),
         Point(0, 0)
       ),
-      Vector(1, -1)
+      Vector(1, -1),
+      0
     )
 
     val expected = Bullet(dummyUuid,
@@ -35,7 +36,8 @@ class BulletSpec extends FlatSpec with Matchers with TestUtils {
         ),
         Point(1, -1)
       ),
-      Vector(1, -1)
+      Vector(1, -1),
+      0
     )
 
     initial.step should equal(expected)

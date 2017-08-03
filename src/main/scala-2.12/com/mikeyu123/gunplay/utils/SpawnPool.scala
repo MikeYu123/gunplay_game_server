@@ -9,10 +9,10 @@ import scala.util.Random
   */
 object SpawnPool {
   val pool: Set[Point] = Set(
-    Point(-50, -50),
-    Point(50, -50),
+//    Point(-50, -50),
+//    Point(50, -50),
     Point(50, 50),
-    Point(-50, -50)
+//    Point(-50, -50)
   )
 
   def randomSpawn: Point = Random.shuffle(pool).head

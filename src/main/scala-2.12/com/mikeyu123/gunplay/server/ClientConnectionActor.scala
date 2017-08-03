@@ -2,6 +2,7 @@ package com.mikeyu123.gunplay.server
 
 import akka.actor.{Actor, ActorRef, Terminated}
 import akka.http.scaladsl.model.ws.TextMessage
+import com.mikeyu123.gunplay.server.messaging.{MessageObject, ObjectsMarshaller}
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
 import spray.json._
@@ -12,13 +13,15 @@ import spray.json._
 
 case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double)
 case object RegisterPlayer
-case class Message(`type`: String, uuid: String, message: Option[JsValue])
+case class ClientMessage(`type`: String, uuid: String, message: Option[JsValue])
+case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject])
 
 class ClientConnectionActor(worldActor: ActorRef) extends Actor with DefaultJsonProtocol {
 //  Todo: move to separate trait
-  implicit val messageFormat = jsonFormat3(Message)
+  implicit val messageFormat = jsonFormat3(ClientMessage)
   implicit val controlsFormat = jsonFormat5(Controls)
-  implicit val publishUpdatesFormat = jsonFormat2(PublishUpdates)
+  implicit val messageObjectFormat = jsonFormat4(MessageObject)
+  implicit val updatesFormat = jsonFormat2(Updates)
   //TODO possibly move connection to constructor to avoid Option handling
   var connection: Option[ActorRef] = None
 
@@ -49,7 +52,9 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with DefaultJson
     case TextMessage.Strict(t) =>
 //controls update and registering here
 //      connection.foreach(_ ! TextMessage.Strict(s"echo $t"))
-      val json: Message = t.toJson.convertTo[Message]
+//      FIXME: insecurity through sending uuid
+//      FIXME: do we sure need to give people uuids?
+      val json: ClientMessage = t.parseJson.convertTo[ClientMessage]
       json.`type` match {
         case "controls" =>
           json.message.foreach { message =>
@@ -65,7 +70,15 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with DefaultJson
       }
 
     case message: PublishUpdates =>
-      val json = message.toJson
+      connection foreach { conn =>
+        val updates = Updates(
+          message.bodies.map(ObjectsMarshaller.marshallBody),
+          message.bullets.map(ObjectsMarshaller.marshallBullet)
+        )
+        val messageToSend = updates.toJson.toString()
+        conn ! TextMessage.Strict(messageToSend)
+      }
+
     case _ => // ingore
   }
 

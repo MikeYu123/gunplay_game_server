@@ -31,9 +31,9 @@ class WorldActor(var world: World) extends Actor {
       clients -= client
 //      TODO don't know whether we need UUIDs here
     case RegisterClient =>
-      val sender = sender()
-      clients += sender
-      context.watch(sender)
+      val s = sender()
+      clients += s
+      context.watch(s)
     case _ =>
   }
 }

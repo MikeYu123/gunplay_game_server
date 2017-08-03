@@ -26,7 +26,7 @@ case class World(players: Set[Body], bullets: Set[Bullet], walls: Set[Wall], doo
     val newPlayer = oldPlayer.map(p => Body(p.uuid, p.graphicsObject, velocity, angle))
 
     val playersWithoutOldPlayer = oldPlayer.fold(players)(players - _)
-    val newPlayers = newPlayer.fold(playersWithoutOldPlayer)(players + _)
+    val newPlayers = newPlayer.fold(playersWithoutOldPlayer)(playersWithoutOldPlayer + _)
     World(newPlayers, bullets, walls, doors)
   }
 }

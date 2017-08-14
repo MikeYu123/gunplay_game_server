@@ -3,22 +3,19 @@ package com.mikeyu123.gunplay.server
 /**
   * Created by mihailurcenkov on 19.07.17.
   */
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.model.ws.Message
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
+
 import scala.concurrent.duration._
-
 import scala.io.StdIn
-
-
-case object ConnectionClose
-case class RegisterConnection(connection: ActorRef)
 
 object WebServer extends App {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   val worldActor = system.actorOf(Props(classOf[WorldActor]))
+//  TODO probably decouple clients and worldActor
   def client = system.actorOf(Props(classOf[ClientConnectionActor], worldActor))
 
 
@@ -61,14 +58,11 @@ object WebServer extends App {
       line = StdIn.readLine()
     }
 
-//    import system.dispatcher // for the future transformations
 //    bindingFuture
 //      .flatMap(_.unbind()) // trigger unbinding from the port
 //      .onComplete(_ => system.terminate()) // and shutdown when done
 //    StdIn.readLine()
 
-//    binding.flatMap(_.unbind()).onComplete(_ => actorSystem.shutdown())
-//    println("Server is down...")
 
   }
 

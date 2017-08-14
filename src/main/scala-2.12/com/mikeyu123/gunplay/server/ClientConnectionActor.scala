@@ -2,7 +2,7 @@ package com.mikeyu123.gunplay.server
 
 import akka.actor.{Actor, ActorRef, Terminated}
 import akka.http.scaladsl.model.ws.TextMessage
-import com.mikeyu123.gunplay.server.messaging.{MessageObject, ObjectsMarshaller}
+import com.mikeyu123.gunplay.server.messaging.{JsonProtocol, ObjectsMarshaller}
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
 import spray.json._
@@ -11,25 +11,11 @@ import spray.json._
   * Created by mihailurcenkov on 25.07.17.
   */
 
-case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double)
-case object RegisterPlayer
-case class ClientMessage(`type`: String, uuid: String, message: Option[JsValue])
-case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject])
 
-class ClientConnectionActor(worldActor: ActorRef) extends Actor with DefaultJsonProtocol {
-//  Todo: move to separate trait
-  implicit val messageFormat = jsonFormat3(ClientMessage)
-  implicit val controlsFormat = jsonFormat5(Controls)
-  implicit val messageObjectFormat = jsonFormat4(MessageObject)
-  implicit val updatesFormat = jsonFormat2(Updates)
+
+class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtocol {
   //TODO possibly move connection to constructor to avoid Option handling
   var connection: Option[ActorRef] = None
-
-
-  override def preStart(): Unit = {
-    super.preStart()
-    worldActor ! RegisterClient
-  }
 
   val receive: Receive = {
 //    Connection initialized
@@ -50,23 +36,21 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with DefaultJson
 //      TODO: check whether there might be binary messages
 //      TODO: move deserializers to separate layer
     case TextMessage.Strict(t) =>
-//controls update and registering here
-//      connection.foreach(_ ! TextMessage.Strict(s"echo $t"))
-//      FIXME: insecurity through sending uuid
-//      FIXME: do we sure need to give people uuids?
       val json: ClientMessage = t.parseJson.convertTo[ClientMessage]
       json.`type` match {
         case "controls" =>
           json.message.foreach { message =>
             val controls: Controls = message.convertTo[Controls]
             val (velocity: Vector, angle: Double) = ControlsParser.parseControls(controls)
-            val messageToSend: UpdateControls = UpdateControls(json.uuid, velocity, angle)
+            val messageToSend: UpdateControls = UpdateControls(velocity, angle)
             worldActor ! messageToSend
           }
         case "register" =>
           val spawnPoint: Point = SpawnPool.randomSpawn
-          val messageToSend = AddPlayer(json.uuid, spawnPoint.x, spawnPoint.y)
-          worldActor ! messageToSend
+          json.uuid.foreach { uuid =>
+            val messageToSend = AddPlayer(uuid, spawnPoint.x, spawnPoint.y)
+            worldActor ! messageToSend
+          }
       }
 
     case message: PublishUpdates =>

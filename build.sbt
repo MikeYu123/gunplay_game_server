@@ -3,7 +3,9 @@ name := "gunplay_from_scratch"
 version := "1.0"
 
 scalaVersion := "2.12.2"
-lazy val gunplayPhysics = RootProject(uri("git://github.com/MikeYu123/gunplay_physics.git"))
+lazy val gunplayPhysics = {
+  RootProject(uri("ssh://git@github.com:MikeYu123/gunplay_physics.git"))
+}
 lazy val root = (project in file(".")).dependsOn(gunplayPhysics)
 val akkaHttpVersion = "10.0.7"
 libraryDependencies ++= Seq(

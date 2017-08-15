@@ -10,7 +10,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 /**
   * Created by mihailurcenkov on 06.08.17.
   */
-
+//TODO: use behave-functions
 class ClientConnectionActorSpec extends TestKit(ActorSystem()) with ImplicitSender with
   FlatSpecLike with BeforeAndAfterAll with Matchers {
 

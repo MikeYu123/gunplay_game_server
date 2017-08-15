@@ -9,6 +9,7 @@ import com.mikeyu123.gunplay.objects._
 
 
 class WorldActor(var world: World) extends Actor {
+//  TODO: move to world constructor
   def this() = this(World(Set[Body](), Set[Bullet](), Set[Wall](), Set[Door]()))
 //  TODO: maybe mutable map?
   var clients: Map[ActorRef, String] = Map[ActorRef, String]()

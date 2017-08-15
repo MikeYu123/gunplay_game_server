@@ -11,6 +11,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
   * Created by mihailurcenkov on 06.08.17.
   */
 //TODO: use behave-functions
+//TODO: rework with sequential logic
 class ClientConnectionActorSpec extends TestKit(ActorSystem()) with ImplicitSender with
   FlatSpecLike with BeforeAndAfterAll with Matchers {
 
@@ -38,10 +39,6 @@ class ClientConnectionActorSpec extends TestKit(ActorSystem()) with ImplicitSend
   }
 
   it should "recieve controls message correctly" in {
-    worldProbe.ignoreMsg {
-      case x: AddPlayer => true
-    }
-    actor ! TextMessage.Strict(registerMessage)
     actor ! TextMessage.Strict(updateMessage)
 
 //    TODO: fix after reworking controlsParser
@@ -50,7 +47,6 @@ class ClientConnectionActorSpec extends TestKit(ActorSystem()) with ImplicitSend
     worldProbe.ignoreNoMsg
     worldProbe.expectNoMsg
   }
-
 
   it should "send updates correctly" in {
     actor ! TextMessage.Strict(registerMessage)

@@ -14,6 +14,7 @@ case class World(players: Set[Body], bullets: Set[Bullet], walls: Set[Wall], doo
     World(newPlayers, newBullets, walls, newDoors)
   }
 
+//  TODO: rework with uuids
   def addPlayer(body: Body) : World = World(players + body, bullets, walls, doors)
 
   def playerClick(body: Body) : World = {

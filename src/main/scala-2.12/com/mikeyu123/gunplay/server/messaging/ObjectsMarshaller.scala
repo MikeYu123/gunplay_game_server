@@ -8,10 +8,10 @@ import com.mikeyu123.gunplay.objects.{Body, Bullet}
 //TODO: decompose via inheritance
 object ObjectsMarshaller {
   def marshallBody(body: Body) = {
-    MessageObject(body.uuid, body.graphicsObject.center.x, body.graphicsObject.center.y, body.angle)
+    MessageObject(body.obj.id, body.obj.center.x, body.obj.center.y, body.angle)
   }
 
   def marshallBullet(bullet: Bullet) = {
-    MessageObject(bullet.uuid, bullet.graphicsObject.center.x, bullet.graphicsObject.center.y, bullet.angle)
+    MessageObject(bullet.obj.id, bullet.obj.center.x, bullet.obj.center.y, bullet.angle)
   }
 }

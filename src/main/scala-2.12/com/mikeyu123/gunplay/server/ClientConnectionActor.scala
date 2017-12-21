@@ -1,5 +1,7 @@
 package com.mikeyu123.gunplay.server
 
+import java.util.UUID
+
 import akka.actor.{Actor, ActorRef, Terminated}
 import akka.http.scaladsl.model.ws.TextMessage
 import com.mikeyu123.gunplay.server.messaging.{JsonProtocol, ObjectsMarshaller}
@@ -46,9 +48,10 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
             worldActor ! messageToSend
           }
         case "register" =>
-          val spawnPoint: Point = SpawnPool.randomSpawn
+          val spawnPoint: Point = SpawnPool.defaultPool.randomSpawn
           json.uuid.foreach { uuid =>
-            val messageToSend = AddPlayer(uuid, spawnPoint.x, spawnPoint.y)
+//            TODO: Exception check
+            val messageToSend = AddPlayer(UUID.fromString(uuid), spawnPoint.x, spawnPoint.y)
             worldActor ! messageToSend
           }
       }
@@ -56,8 +59,8 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
     case message: PublishUpdates =>
       connection foreach { conn =>
         val updates = Updates(
-          message.bodies.map(ObjectsMarshaller.marshallBody),
-          message.bullets.map(ObjectsMarshaller.marshallBullet)
+          message.bodies.map(ObjectsMarshaller.marshallPhysicsObject),
+          message.bullets.map(ObjectsMarshaller.marshallPhysicsObject)
         )
         val messageToSend = updates.toJson.toString()
         conn ! TextMessage.Strict(messageToSend)

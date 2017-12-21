@@ -1,5 +1,7 @@
 package com.mikeyu123.gunplay
 
+import java.util.UUID
+
 import akka.actor.ActorRef
 import com.mikeyu123.gunplay.objects.{Body, Bullet}
 import com.mikeyu123.gunplay.server.messaging.MessageObject
@@ -17,7 +19,7 @@ package object server {
   case class RegisterConnection(connection: ActorRef)
 // [[ClientConnectionActor]] sent message to [WorldActor] to add Body object
 //  TODO: point??
-  case class AddPlayer(uuid: String, x: Double, y: Double)
+  case class AddPlayer(uuid: UUID, x: Double, y: Double)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
   case class UpdateControls(velocity: Vector, angle: Double)
   case object Step

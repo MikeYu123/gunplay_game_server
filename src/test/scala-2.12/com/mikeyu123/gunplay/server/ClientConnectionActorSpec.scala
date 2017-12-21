@@ -1,5 +1,7 @@
 package com.mikeyu123.gunplay.server
 
+import java.util.UUID
+
 import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.model.ws.TextMessage
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
@@ -33,7 +35,7 @@ class ClientConnectionActorSpec extends TestKit(ActorSystem()) with ImplicitSend
     actor ! TextMessage.Strict(registerMessage)
     //    TODO: rework after reworking spawnPool
     worldProbe.expectMsgPF() {
-      case AddPlayer("13d9b6e2-96c8-4f9d-b664-15fb48658f8e", _, _) => true
+      case AddPlayer(UUID.fromString("13d9b6e2-96c8-4f9d-b664-15fb48658f8e"), _, _) => true
     }
     worldProbe.expectNoMsg
   }
@@ -52,11 +54,11 @@ class ClientConnectionActorSpec extends TestKit(ActorSystem()) with ImplicitSend
     actor ! TextMessage.Strict(registerMessage)
     //    TODO: rework after reworking spawnPool
     val (x: Double, y: Double) =  worldProbe.expectMsgPF() {
-      case AddPlayer("13d9b6e2-96c8-4f9d-b664-15fb48658f8e", x, y) => (x, y)
+      case AddPlayer(UUID.fromString("13d9b6e2-96c8-4f9d-b664-15fb48658f8e"), x, y) => (x, y)
       case _ => (0, 0)
     }
 
-    val body = Body.initBody("13d9b6e2-96c8-4f9d-b664-15fb48658f8e", x, y)
+    val body = Body.initBody(UUID.fromString("13d9b6e2-96c8-4f9d-b664-15fb48658f8e"), x, y)
 
     worldProbe.send(actor, PublishUpdates(Set[Body](body), Set[Bullet]()))
 

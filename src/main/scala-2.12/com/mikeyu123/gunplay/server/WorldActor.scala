@@ -1,7 +1,10 @@
 package com.mikeyu123.gunplay.server
 
+import java.util.UUID
+
 import akka.actor.{Actor, ActorRef, Terminated}
 import com.mikeyu123.gunplay.objects._
+import com.mikeyu123.gunplay_physics.objects.Scene
 
 /**
   * Created by mihailurcenkov on 25.07.17.
@@ -12,7 +15,7 @@ class WorldActor(var world: World) extends Actor {
 //  TODO: move to world constructor
   def this() = this(World(Set[Body](), Set[Bullet](), Set[Wall](), Set[Door]()))
 //  TODO: maybe mutable map?
-  var clients: Map[ActorRef, String] = Map[ActorRef, String]()
+  var clients: Map[ActorRef, UUID] = Map[ActorRef, UUID]()
 
 
   override def receive: Receive = {
@@ -23,7 +26,7 @@ class WorldActor(var world: World) extends Actor {
       world = world.addPlayer(Body.initBody(uuid, x, y))
     case UpdateControls(velocity, angle) =>
 //      TODO: handle shit when no uuid
-      val uuid: String = clients(sender())
+      val uuid: UUID = clients(sender())
       world = world.updateControls(uuid, velocity, angle)
     case Step =>
       world = world.step

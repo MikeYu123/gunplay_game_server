@@ -9,12 +9,16 @@ import scala.util.Random
   */
 object SpawnPool {
 //  TODO make it configurable
-  val pool: Set[Point] = Set(
+  val defaultPoolSet: Set[Point] = Set(
     Point(-50, -50),
     Point(50, -50),
     Point(50, 50),
     Point(-50, -50)
   )
 
-  def randomSpawn: Point = Random.shuffle(pool).head
+  val defaultPool = new SpawnPool(defaultPoolSet)
+}
+
+case class SpawnPool(poolSet: Set[Point]) {
+  def randomSpawn: Point = Random.shuffle(poolSet).head
 }

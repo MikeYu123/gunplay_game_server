@@ -6,7 +6,8 @@ import spray.json.DefaultJsonProtocol
 /**
   * Created by mihailurcenkov on 06.08.17.
   */
-trait JsonProtocol extends DefaultJsonProtocol {
+trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
+
   implicit val messageFormat = jsonFormat3(ClientMessage)
   implicit val controlsFormat = jsonFormat5(Controls)
   implicit val messageObjectFormat = jsonFormat4(MessageObject)

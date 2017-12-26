@@ -1,13 +1,16 @@
 package com.mikeyu123.gunplay.objects
 import java.util.UUID
 
-import com.mikeyu123.gunplay_physics.objects.Scene
-import com.mikeyu123.gunplay_physics.structs.{Motion, PhysicsProperties, Vector}
+import com.mikeyu123.gunplay.utils.GameContactListener
+import com.mikeyu123.gunplay_physics.objects.{PhysicsObject, Scene}
+import com.mikeyu123.gunplay_physics.structs.{ContactListener, Motion, PhysicsProperties, QTree, SceneProperties, Vector}
 
 /**
   * Created by mihailurcenkov on 13.07.17.
   */
 case class World(players: Set[Body], bullets: Set[Bullet], walls: Set[Wall], doors: Set[Door]) {
+  val objects: Set[PhysicsObject] = players ++ bullets ++ walls ++ doors
+  val scene = Scene(objects, contactListener = GameContactListener)
   def step : World = {
 //    TODO: Add collision detection
 //    TODO: Rework to actors

@@ -1,6 +1,9 @@
 package com.mikeyu123.gunplay.objects
 import java.util.UUID
 
+import com.mikeyu123.gunplay.objects.World.WorldUpdates
+import com.mikeyu123.gunplay.server.Updates
+import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller
 import com.mikeyu123.gunplay.utils.GameContactListener
 import com.mikeyu123.gunplay_physics.objects.{PhysicsObject, Scene}
 import com.mikeyu123.gunplay_physics.structs.{ContactListener, Motion, PhysicsProperties, QTree, SceneProperties, Vector}
@@ -8,32 +11,55 @@ import com.mikeyu123.gunplay_physics.structs.{ContactListener, Motion, PhysicsPr
 /**
   * Created by mihailurcenkov on 13.07.17.
   */
-case class World(players: Set[Body], bullets: Set[Bullet], walls: Set[Wall], doors: Set[Door]) {
-  val objects: Set[PhysicsObject] = players ++ bullets ++ walls ++ doors
-  val scene = Scene(objects, contactListener = GameContactListener)
+object World{
+  def apply(players: Set[Body] = Set(),
+            bullets: Set[Bullet] = Set(),
+            walls: Set[Wall] = Set(),
+            doors: Set[Door] = Set()) = {
+    val scene = Scene(players ++ bullets ++ walls ++ doors, contactListener = GameContactListener)
+    new World(scene)
+  }
+//  TODO WorldUpdates & Updates Namings
+  case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Bullet] = Set()) {
+    def marshall : Updates = {
+      Updates(
+        bodies.map(ObjectsMarshaller.marshallPhysicsObject),
+        bullets.map(ObjectsMarshaller.marshallPhysicsObject)
+      )
+    }
+  }
+}
+case class World(scene: Scene) {
   def step : World = {
 //    TODO: Add collision detection
 //    TODO: Rework to actors
-    val newPlayers = players.map(_.step)
-    val newBullets = bullets.map(_.step)
-    val newDoors = doors.map(_.step)
-    World(newPlayers, newBullets, walls, newDoors)
+    World(scene.step)
+  }
+
+  def updates: WorldUpdates = {
+    scene.objects.foldLeft(WorldUpdates())({ (acc: WorldUpdates, obj: PhysicsObject) =>
+      obj match {
+        case x: Body => WorldUpdates(acc.bodies + x, acc.bullets)
+        case x: Bullet => WorldUpdates(acc.bodies, acc.bullets + x)
+        case _ => acc
+      }
+    })
   }
 
 //  TODO: rework with uuids
-  def addPlayer(body: Body) : World = World(players + body, bullets, walls, doors)
+  def addPlayer(body: Body) : World = World(scene + body)
 
   def playerClick(body: Body) : World = {
 //    TODO: add bullet
-    World(players, bullets, walls, doors)
+    World(scene)
   }
 
   def updateControls(id: UUID, velocity: Vector, angle: Double): World = {
-    val oldPlayer = players.find(_.id == id)
+    val oldPlayer = scene.getObject(id)
     val newPlayer = oldPlayer.map(p => Body(p.shape, p.center, PhysicsProperties(Motion(velocity, angle)), id))
 
-    val playersWithoutOldPlayer = oldPlayer.fold(players)(players - _)
-    val newPlayers = newPlayer.fold(playersWithoutOldPlayer)(playersWithoutOldPlayer + _)
-    World(newPlayers, bullets, walls, doors)
+    val sceneWithoutOldPlayer = oldPlayer.fold(scene)(scene - _)
+    val newScene = newPlayer.fold(sceneWithoutOldPlayer)(sceneWithoutOldPlayer + _)
+    World(newScene)
   }
 }

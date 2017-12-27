@@ -23,7 +23,7 @@ package object server {
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
   case class UpdateControls(velocity: Vector, angle: Double)
   case object Step
-  case class PublishUpdates(bodies: Set[Body], bullets: Set[Bullet])
+  case class PublishUpdates(updates: Updates)
   case object RegisterClient
 
   case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double)

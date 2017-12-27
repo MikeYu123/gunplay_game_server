@@ -58,11 +58,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
 
     case message: PublishUpdates =>
       connection foreach { conn =>
-        val updates = Updates(
-          message.bodies.map(ObjectsMarshaller.marshallPhysicsObject),
-          message.bullets.map(ObjectsMarshaller.marshallPhysicsObject)
-        )
-        val messageToSend = updates.toJson.toString()
+        val messageToSend = message.updates.toJson.toString()
         conn ! TextMessage.Strict(messageToSend)
       }
 

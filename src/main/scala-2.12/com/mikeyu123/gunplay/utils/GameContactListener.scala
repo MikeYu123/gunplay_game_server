@@ -10,11 +10,13 @@ object GameContactListener extends ContactListener {
       case (x: Body, y: Bullet) =>
 //        eliminateBody()
 //        eliminateBullet()
-      Contact(contact.ab, contact.normal, ContactState.RemoveBoth)
+      //      Contact(contact.ab, contact.normal, ContactState.RemoveBoth)
+          Contact(contact.ab, contact.normal, ContactState.RemoveA)
       case (x: Bullet, y: Body) =>
         //        eliminateBody()
         //        eliminateBullet()
-        Contact(contact.ab, contact.normal, ContactState.RemoveBoth)
+        //      Contact(contact.ab, contact.normal, ContactState.RemoveBoth)
+      Contact(contact.ab, contact.normal, ContactState.RemoveB)
       case (x: Bullet, y: Wall) =>
 //        eliminateBullet()
         Contact(contact.ab, contact.normal, ContactState.RemoveA)

@@ -11,7 +11,7 @@ import com.mikeyu123.gunplay_physics.structs.{GeometryPrimitive, PhysicsProperti
 case class Wall(override val shape: GeometryPrimitive,
                 override val center: Point,
                 override val properties: PhysicsProperties,
-                override val id: UUID) extends StaticObject(shape, center, properties, id) {
+                override val id: UUID = UUID.randomUUID()) extends StaticObject(shape, center, properties, id) {
   def step: Wall =
     this
 }

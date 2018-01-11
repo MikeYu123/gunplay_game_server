@@ -33,6 +33,23 @@ case class Body(override val shape: GeometryPrimitive,
 //  def this(uuid: String, rectangle: Rectangle, velocity: Vector, angle: Double) =
 //    this(uuid, GraphicsObject(rectangle, rectangle.center), velocity, angle)
 
-  def step: Body =
-    Body(shape.move(properties.motion, center), center, properties, id)
+  override def move(vector: Vector): Body = {
+    Body(shape.move(vector), center + vector, properties, id)
+  }
+
+  override def rotate(radians: Double): Body = {
+    Body(shape.rotate(radians, center), center, properties, id)
+  }
+
+  override def applyMotion(motion: Motion): Body = {
+    Body(shape.move(motion, center), center + motion.path, properties, id)
+  }
+
+  override def applyMotion: Body = {
+    this.applyMotion(properties.motion)
+  }
+
+  override def setMotion(motion: Motion): Body = {
+    Body(shape, center, properties.setMotion(motion), id)
+  }
 }

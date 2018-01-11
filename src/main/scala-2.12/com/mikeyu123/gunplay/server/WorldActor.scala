@@ -13,7 +13,7 @@ import com.mikeyu123.gunplay_physics.objects.Scene
 
 class WorldActor(var world: World) extends Actor {
 //  TODO: move to world constructor
-  def this() = this(World(Set[Body](), Set[Bullet](), Set[Wall](), Set[Door]()))
+  def this() = this(World())
 //  TODO: maybe mutable map?
   var clients: Map[ActorRef, UUID] = Map[ActorRef, UUID]()
 
@@ -30,9 +30,11 @@ class WorldActor(var world: World) extends Actor {
       world = world.updateControls(uuid, velocity, angle)
     case Step =>
       world = world.step
+      println(world)
       clients.foreach { _._1 ! PublishUpdates(world.updates.marshall) }
     case Terminated(client) =>
 //      TODO: remove body from world
+      world = world removePlayerById clients(client)
       clients -= client
     case _ =>
   }

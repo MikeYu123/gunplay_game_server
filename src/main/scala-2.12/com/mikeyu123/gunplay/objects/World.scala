@@ -14,7 +14,10 @@ import com.mikeyu123.gunplay_physics.structs.{ContactListener, Motion, PhysicsPr
 object World{
   def apply(players: Set[Body] = Set(),
             bullets: Set[Bullet] = Set(),
-            walls: Set[Wall] = Set(Wall(Rectangle(Point(-60, 60), 200, 50), Point(-60, 60), PhysicsProperties(Motion(Vector(0,0), 0)))),
+            walls: Set[Wall] = Set(
+              Wall(Rectangle(Point(60, 60), 200, 50), Point(60, 60), PhysicsProperties(Motion(Vector(0,0), 0))),
+              Wall(Rectangle(Point(60, 60), 50, 200), Point(60, 60), PhysicsProperties(Motion(Vector(0,0), 0))),
+            ),
 //            walls: Set[Wall] = Set(),
             doors: Set[Door] = Set()) = {
     val scene = Scene(players ++ bullets ++ walls ++ doors, contactListener = GameContactListener)

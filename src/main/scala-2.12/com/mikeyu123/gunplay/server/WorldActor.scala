@@ -30,7 +30,7 @@ class WorldActor(var world: World) extends Actor {
       world = world.updateControls(uuid, velocity, angle)
     case Step =>
       world = world.step
-      println(world)
+//      println(world)
       clients.foreach { _._1 ! PublishUpdates(world.updates.marshall) }
     case Terminated(client) =>
 //      TODO: remove body from world

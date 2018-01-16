@@ -10,7 +10,7 @@ import com.mikeyu123.gunplay_physics.structs.{GeometryPrimitive, Motion, Physics
   */
 object Body {
   val defaultWidth: Double = 10d
-  val defaultHeight: Double = 2d
+  val defaultHeight: Double = 10d
 
 //  init player with coordinates in given x and y
   def initBody(id: UUID, x: Double, y: Double): Body = {
@@ -19,7 +19,7 @@ object Body {
       Point(x + defaultWidth / 2, y + defaultHeight / 2),
       Point(x - defaultWidth / 2, y + defaultHeight / 2)
     )
-    Body(rectangle, Point(0,0), PhysicsProperties(Motion(Vector(0,0), 0d)), id)
+    Body(rectangle, Point(x, y), PhysicsProperties(Motion(Vector(0,0), 0d)), id)
   }
 
   def initBody(id: UUID, point: Point): Body = initBody(id, point.x, point.y)

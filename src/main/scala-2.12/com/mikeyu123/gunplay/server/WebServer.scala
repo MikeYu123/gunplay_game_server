@@ -4,17 +4,25 @@ package com.mikeyu123.gunplay.server
   * Created by mihailurcenkov on 19.07.17.
   */
 import akka.actor.{ActorSystem, Props}
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.ws.Message
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
+import com.mikeyu123.gunplay.utils.LevelParser
+import com.mikeyu123.gunplay.utils.LevelParser.LevelData
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
 import scala.io.StdIn
+import net.ceedubs.ficus.Ficus._
+import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 
-object WebServer extends App {
+
+object WebServer extends App with LevelParser with SprayJsonSupport {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   val worldActor = system.actorOf(Props(classOf[WorldActor]))
+  val levels = ConfigFactory.load("levels").as[List[LevelData]]("levels")
 //  TODO probably decouple clients and worldActor
   def client = system.actorOf(Props(classOf[ClientConnectionActor], worldActor))
 
@@ -39,6 +47,9 @@ object WebServer extends App {
 
     val route = get {
       akka.http.scaladsl.server.Directives.handleWebSocketMessages(flow)
+    } ~
+      path("levels" / IntNumber) { index =>
+        complete(levels(index))
     }
 
     val bindingFuture =

@@ -10,8 +10,8 @@ import com.mikeyu123.gunplay_physics.structs.{GeometryPrimitive, Motion, Physics
   */
 case class Door(override val shape: GeometryPrimitive,
                   override val center: Point,
-                  override val properties: PhysicsProperties,
-                  override val id: UUID) extends ImmovableObject(shape, center, properties, id) {
+                  override val properties: PhysicsProperties = PhysicsProperties(Motion(Vector(0,0), 0)),
+                  override val id: UUID = UUID.randomUUID()) extends ImmovableObject(shape, center, properties, id) {
   override def move(vector: Vector): Door = {
     Door(shape.move(vector), center + vector, properties, id)
   }

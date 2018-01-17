@@ -7,6 +7,7 @@ import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller
 import com.mikeyu123.gunplay.utils.GameContactListener
 import com.mikeyu123.gunplay_physics.objects.{PhysicsObject, Scene}
 import com.mikeyu123.gunplay_physics.structs.{ContactListener, Motion, PhysicsProperties, Point, QTree, Rectangle, SceneProperties, Vector}
+import ObjectsMarshaller._
 
 /**
   * Created by mihailurcenkov on 13.07.17.
@@ -27,8 +28,8 @@ object World{
   case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Bullet] = Set()) {
     def marshall : Updates = {
       Updates(
-        bodies.map(ObjectsMarshaller.marshallPhysicsObject),
-        bullets.map(ObjectsMarshaller.marshallPhysicsObject)
+        bodies.map(_.marshall),
+        bullets.map(_.marshall)
       )
     }
   }

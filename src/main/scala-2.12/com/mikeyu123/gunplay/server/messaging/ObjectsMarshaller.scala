@@ -8,7 +8,9 @@ import com.mikeyu123.gunplay_physics.objects.PhysicsObject
   */
 //TODO: decompose via inheritance
 object ObjectsMarshaller {
-  def marshallPhysicsObject(obj: PhysicsObject) = {
-    MessageObject(obj.id, obj.center.x, obj.center.y, obj.properties.motion.radians)
+  implicit class MarshallablePhysicsObject(obj: PhysicsObject) {
+    def marshall: MessageObject = {
+      MessageObject(obj.id, obj.center.x, obj.center.y, obj.properties.motion.radians)
+    }
   }
 }

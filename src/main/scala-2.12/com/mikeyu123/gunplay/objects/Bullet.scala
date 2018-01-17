@@ -11,7 +11,7 @@ import com.mikeyu123.gunplay_physics.structs.{GeometryPrimitive, Motion, Physics
 case class Bullet(override val shape: GeometryPrimitive,
                   override val center: Point,
                   override val properties: PhysicsProperties,
-                  override val id: UUID) extends MovableObject(shape, center, properties, id) {
+                  override val id: UUID = UUID.randomUUID()) extends MovableObject(shape, center, properties, id) {
   override def move(vector: Vector): Bullet = {
     Bullet(shape.move(vector), center + vector, properties, id)
   }

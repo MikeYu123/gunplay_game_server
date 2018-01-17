@@ -2,8 +2,8 @@ package com.mikeyu123.gunplay.objects
 import java.util.UUID
 
 import com.mikeyu123.gunplay.objects.World.WorldUpdates
-import com.mikeyu123.gunplay.server.Updates
-import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller
+import com.mikeyu123.gunplay.server.{Updates}
+import com.mikeyu123.gunplay.server.messaging.{ObjectsMarshaller}
 import com.mikeyu123.gunplay.utils.GameContactListener
 import com.mikeyu123.gunplay_physics.objects.{PhysicsObject, Scene}
 import com.mikeyu123.gunplay_physics.structs.{ContactListener, Motion, PhysicsProperties, Point, QTree, Rectangle, SceneProperties, Vector}
@@ -26,12 +26,16 @@ object World{
     new World(scene)
   }
 
-  def fromLevel(level: LevelData): Unit = {
+  def fromLevel(level: LevelData): World = {
     val walls = level.walls.map { wallData =>
-      Wall(Rectangle(wallData.center, wallData.width, wallData.height), wallData.center)
+      Wall(Rectangle(Point(wallData.x, wallData.y), wallData.width, wallData.height),
+        Point(wallData.x, wallData.y),
+        id = wallData.uuid)
     }
     val doors = level.doors.map { doorData =>
-      Door(Rectangle(doorData.center, doorData.width, doorData.height), doorData.center)
+      Door(Rectangle(Point(doorData.x, doorData.y), doorData.width, doorData.height),
+        Point(doorData.x, doorData.y),
+        id = doorData.uuid)
     }
     World(Set[Body](), Set[Bullet](), walls, doors)
   }

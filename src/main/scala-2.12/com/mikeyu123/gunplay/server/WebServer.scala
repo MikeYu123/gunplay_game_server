@@ -5,12 +5,15 @@ package com.mikeyu123.gunplay.server
   */
 import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.model.HttpHeader
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.ws.Message
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
-import com.mikeyu123.gunplay.objects.World
+import com.mikeyu123.gunplay.objects.{Door, Wall, World}
 import com.mikeyu123.gunplay.utils.LevelParser
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
+import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
@@ -23,6 +26,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   val levels = ConfigFactory.load("levels").as[List[LevelData]]("levels")
+  val world = World.fromLevel(levels(0))
   val worldActor = system.actorOf(Props(classOf[WorldActor], World.fromLevel(levels(0))))
 //  TODO probably decouple clients and worldActor
   def client = system.actorOf(Props(classOf[ClientConnectionActor], worldActor))
@@ -50,7 +54,11 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
       akka.http.scaladsl.server.Directives.handleWebSocketMessages(flow)
     } ~
       path("levels" / IntNumber) { index =>
-        complete(levels(index))
+        get {
+          respondWithHeader(RawHeader("Access-Control-Allow-Origin", "http://localhost:8080")){
+            complete(levels(0))
+          }
+        }
     }
 
     val bindingFuture =

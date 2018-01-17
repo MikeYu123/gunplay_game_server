@@ -8,6 +8,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.ws.Message
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
+import com.mikeyu123.gunplay.objects.World
 import com.mikeyu123.gunplay.utils.LevelParser
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
 import com.typesafe.config.ConfigFactory
@@ -21,8 +22,8 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 object WebServer extends App with LevelParser with SprayJsonSupport {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
-  val worldActor = system.actorOf(Props(classOf[WorldActor]))
   val levels = ConfigFactory.load("levels").as[List[LevelData]]("levels")
+  val worldActor = system.actorOf(Props(classOf[WorldActor], World.fromLevel(levels(0))))
 //  TODO probably decouple clients and worldActor
   def client = system.actorOf(Props(classOf[ClientConnectionActor], worldActor))
 

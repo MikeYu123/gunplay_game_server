@@ -8,6 +8,7 @@ import com.mikeyu123.gunplay.utils.GameContactListener
 import com.mikeyu123.gunplay_physics.objects.{PhysicsObject, Scene}
 import com.mikeyu123.gunplay_physics.structs.{ContactListener, Motion, PhysicsProperties, Point, QTree, Rectangle, SceneProperties, Vector}
 import ObjectsMarshaller._
+import com.mikeyu123.gunplay.utils.LevelParser.LevelData
 
 /**
   * Created by mihailurcenkov on 13.07.17.
@@ -23,6 +24,16 @@ object World{
             doors: Set[Door] = Set()) = {
     val scene = Scene(players ++ bullets ++ walls ++ doors, contactListener = GameContactListener)
     new World(scene)
+  }
+
+  def fromLevel(level: LevelData): Unit = {
+    val walls = level.walls.map { wallData =>
+      Wall(Rectangle(wallData.center, wallData.width, wallData.height), wallData.center)
+    }
+    val doors = level.doors.map { doorData =>
+      Door(Rectangle(doorData.center, doorData.width, doorData.height), doorData.center)
+    }
+    World(Set[Body](), Set[Bullet](), walls, doors)
   }
 //  TODO WorldUpdates & Updates Namings
   case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Bullet] = Set()) {

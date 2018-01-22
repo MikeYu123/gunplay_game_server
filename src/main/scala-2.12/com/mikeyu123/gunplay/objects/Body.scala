@@ -52,4 +52,14 @@ case class Body(override val shape: GeometryPrimitive,
   override def setMotion(motion: Motion): Body = {
     Body(shape, center, properties.setMotion(motion), id)
   }
+
+  def emitBullet : Bullet = {
+    val velocity = Vector(10 * Math.cos(properties.motion.radians), 10 * Math.sin(properties.motion.radians))
+    val bulletCenter = center + velocity
+    Bullet(
+      Rectangle(bulletCenter, Bullet.width, Bullet.height),
+      bulletCenter,
+      PhysicsProperties(Motion(velocity, properties.motion.radians))
+    )
+  }
 }

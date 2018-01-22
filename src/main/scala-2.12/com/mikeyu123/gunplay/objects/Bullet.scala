@@ -8,6 +8,10 @@ import com.mikeyu123.gunplay_physics.structs.{GeometryPrimitive, Motion, Physics
 /**
   * Created by mihailurcenkov on 13.07.17.
   */
+object Bullet {
+  val width = 5
+  val height = 1
+}
 case class Bullet(override val shape: GeometryPrimitive,
                   override val center: Point,
                   override val properties: PhysicsProperties,

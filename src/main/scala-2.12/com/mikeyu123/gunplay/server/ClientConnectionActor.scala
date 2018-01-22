@@ -43,9 +43,11 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
         case "controls" =>
           json.message.foreach { message =>
             val controls: Controls = message.convertTo[Controls]
-            val (velocity: Vector, angle: Double) = ControlsParser.parseControls(controls)
+            val (velocity: Vector, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
             val messageToSend: UpdateControls = UpdateControls(velocity, angle)
             worldActor ! messageToSend
+            if(click)
+              worldActor ! EmitBullet
           }
         case "register" =>
           val spawnPoint: Point = SpawnPool.defaultPool.randomSpawn

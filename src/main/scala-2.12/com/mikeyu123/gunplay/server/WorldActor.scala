@@ -28,6 +28,10 @@ class WorldActor(var world: World) extends Actor {
 //      TODO: handle shit when no uuid
       val uuid: UUID = clients(sender())
       world = world.updateControls(uuid, velocity, angle)
+    case EmitBullet =>
+      //      TODO: handle shit when no uuid
+      val uuid: UUID = clients(sender())
+      world = world.emitBullet(uuid)
     case Step =>
       world = world.step
 //      println(world)

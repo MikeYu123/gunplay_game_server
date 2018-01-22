@@ -22,11 +22,12 @@ package object server {
   case class AddPlayer(uuid: UUID, x: Double, y: Double)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
   case class UpdateControls(velocity: Vector, angle: Double)
+  case object EmitBullet
   case object Step
   case class PublishUpdates(updates: Updates)
   case object RegisterClient
 
-  case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double)
+  case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double, click: Boolean)
   case object RegisterPlayer
   case class ClientMessage(`type`: String, uuid: Option[String], message: Option[JsValue])
   case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject])

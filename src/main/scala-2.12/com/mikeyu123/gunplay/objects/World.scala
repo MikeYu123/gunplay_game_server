@@ -67,6 +67,14 @@ case class World(scene: Scene) {
     })
   }
 
+
+  def emitBullet(uuid: UUID): World = {
+    scene.getObject(uuid).fold(this){
+      case body: Body =>
+        World(scene + body.emitBullet)
+      case _ => this
+    }
+  }
 //  TODO: rework with uuids
   def addPlayer(body: Body) : World = World(scene + body)
 

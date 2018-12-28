@@ -6,6 +6,7 @@ import akka.actor.ActorRef
 import com.mikeyu123.gunplay.objects.{Body, Bullet}
 import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay_physics.structs.Vector
+import org.dyn4j.geometry.Vector2
 import spray.json.JsValue
 
 /**
@@ -21,7 +22,8 @@ package object server {
 //  TODO: point??
   case class AddPlayer(uuid: UUID, x: Double, y: Double)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
-  case class UpdateControls(velocity: Vector, angle: Double)
+  case class UpdateControls(velocity: Vector2, angle: Double)
+  case class Registered(uuid: UUID)
   case object EmitBullet
   case object Step
   case class PublishUpdates(updates: Updates)

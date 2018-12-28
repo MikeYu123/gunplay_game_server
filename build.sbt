@@ -17,7 +17,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.5.3",
   "com.typesafe.akka" %% "akka-stream-testkit" % "2.5.3",
   "com.typesafe.akka" %% "akka-testkit" % "2.5.3",
-  "com.iheart" %% "ficus" % "1.4.3"
+  "com.iheart" %% "ficus" % "1.4.3",
+  "org.dyn4j" % "dyn4j" % "3.3.0"
 )
 
 

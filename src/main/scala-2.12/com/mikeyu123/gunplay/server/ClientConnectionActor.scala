@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.ws.TextMessage
 import com.mikeyu123.gunplay.server.messaging.{JsonProtocol, ObjectsMarshaller}
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
+import org.dyn4j.geometry.Vector2
 import spray.json._
 
 /**
@@ -43,7 +44,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
         case "controls" =>
           json.message.foreach { message =>
             val controls: Controls = message.convertTo[Controls]
-            val (velocity: Vector, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
+            val (velocity: Vector2, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
             val messageToSend: UpdateControls = UpdateControls(velocity, angle)
             worldActor ! messageToSend
             if(click)
@@ -62,6 +63,14 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
       connection foreach { conn =>
         val messageToSend = message.updates.toJson.toString()
         conn ! TextMessage.Strict(messageToSend)
+      }
+
+    case Registered(uuid) =>
+      println(s"registered $uuid")
+      connection foreach {
+        conn =>
+          val messageToSend = JsObject(("registered", JsBoolean(true)), ("id", JsString(uuid.toString))).toJson.toString
+          conn ! TextMessage.Strict(messageToSend)
       }
 
     case _ => // ingore

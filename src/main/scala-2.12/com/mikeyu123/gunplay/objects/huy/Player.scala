@@ -28,5 +28,4 @@ class Player(width: Double = defaultWidth, height: Double = defaultHeight, posit
   shape.setAngularVelocity(0.0)
   shape.setMass(MassType.NORMAL)
   shape.setUserData(PlayerData(shape.getId))
-
 }

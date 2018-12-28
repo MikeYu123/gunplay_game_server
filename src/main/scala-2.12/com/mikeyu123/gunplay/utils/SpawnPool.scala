@@ -10,9 +10,9 @@ import scala.util.Random
 object SpawnPool {
 //  TODO make it configurable
   val defaultPoolSet: Set[Point] = Set(
-//    Point(-50, 50),
-//    Point(50, -50),
-//    Point(50, 50),
+    Point(-50, 50),
+    Point(50, -50),
+    Point(50, 50),
     Point(-50, -50)
   )
 

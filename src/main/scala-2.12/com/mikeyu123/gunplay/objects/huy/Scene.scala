@@ -127,6 +127,7 @@ class Scene() {
     }.foreach(player => {
       player.setLinearVelocity(velocity)
       player.setAngularVelocity(angular)
+      player.setAsleep(false)
     })
   }
 

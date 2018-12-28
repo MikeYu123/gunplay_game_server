@@ -40,7 +40,7 @@ class WorldActor2(val scene: Scene) extends Actor {
       scene.step()
       clients.foreach { _._1 ! PublishUpdates(scene.updates.marshall) }
     case Terminated(client) =>
-      println(s"terminated ${clients(client)}")
+//      println(s"terminated ${clients(client)}")
 //      TODO: remove body from world
       scene removePlayerById clients(client)
       clients -= client

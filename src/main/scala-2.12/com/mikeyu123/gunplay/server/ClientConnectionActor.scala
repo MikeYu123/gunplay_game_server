@@ -46,7 +46,6 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
             val controls: Controls = message.convertTo[Controls]
             val (velocity: Vector2, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
             val messageToSend: UpdateControls = UpdateControls(velocity, angle)
-            println(messageToSend)
             worldActor ! messageToSend
             if(click)
               worldActor ! EmitBullet
@@ -67,7 +66,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
       }
 
     case Registered(uuid) =>
-      println(s"registered $uuid")
+//      println(s"registered $uuid")
       connection foreach {
         conn =>
           val messageToSend = JsObject(("registered", JsBoolean(true)), ("id", JsString(uuid.toString))).toJson.toString

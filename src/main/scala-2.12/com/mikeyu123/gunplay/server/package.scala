@@ -3,7 +3,6 @@ package com.mikeyu123.gunplay
 import java.util.UUID
 
 import akka.actor.ActorRef
-import com.mikeyu123.gunplay.objects.{Body, Bullet}
 import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay_physics.structs.Vector
 import org.dyn4j.geometry.Vector2
@@ -32,5 +31,5 @@ package object server {
   case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double, click: Boolean)
   case object RegisterPlayer
   case class ClientMessage(`type`: String, uuid: Option[String], message: Option[JsValue])
-  case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject])
+  case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject], doors: Set[MessageObject])
 }

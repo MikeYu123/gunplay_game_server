@@ -10,6 +10,6 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
 
   implicit val messageFormat = jsonFormat3(ClientMessage)
   implicit val controlsFormat = jsonFormat6(Controls)
-  implicit val messageObjectFormat = jsonFormat4(MessageObject)
-  implicit val updatesFormat = jsonFormat2(Updates)
+  implicit val messageObjectFormat = jsonFormat6(MessageObject)
+  implicit val updatesFormat = jsonFormat3(Updates)
 }

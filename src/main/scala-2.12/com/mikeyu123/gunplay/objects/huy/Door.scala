@@ -20,6 +20,6 @@ class Door(width: Double = defaultWidth, height: Double = defaultHeight, positio
   shape.setLinearVelocity(velocity)
   shape.translate(position)
   shape.setAngularVelocity(0.0)
-  shape.setMass(MassType.INFINITE)
+  shape.setMass(MassType.NORMAL)
   shape.setUserData(DoorData(shape.getId))
 }

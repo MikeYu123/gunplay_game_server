@@ -21,11 +21,12 @@ import org.dyn4j.dynamics.contact._
 import org.dyn4j.geometry.Vector2
 
 object Scene {
-  case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Body] = Set()) {
+  case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Body] = Set(), doors: Set[Body] = Set()) {
     def marshall : Updates = {
       Updates(
         bodies.map(_.marshall),
-        bullets.map(_.marshall)
+        bullets.map(_.marshall),
+        doors.map(_.marshall)
       )
     }
   }
@@ -34,7 +35,7 @@ object Scene {
       new Wall(wallData.width, wallData.height, new Vector2(wallData.x, wallData.y), new Vector2(0,0))
     }
     val doors = level.doors.map { doorData =>
-      new Wall(doorData.width, doorData.height, new Vector2(doorData.x, doorData.y), new Vector2(0,0))
+      new Door(doorData.width, doorData.height, new Vector2(doorData.x, doorData.y), new Vector2(0,0))
     }
     val scene = new Scene()
     walls.foreach(wall => scene.world.addBody(wall.shape))
@@ -68,133 +69,54 @@ class Scene() {
     })
   }
 
-//  val listener = new ContactListener {
-//    override def postSolve(point: SolvedContactPoint): Unit = {}
-//
-//    override def preSolve(point: ContactPoint): Boolean = true
-//
-//    override def sensed(point: ContactPoint): Unit = {}
-//
-//    override def end(point: ContactPoint): Unit = {}
-//
-//
-//    override def persist(point: PersistedContactPoint): Boolean = false
-//
-//    override def begin(point: ContactPoint): Boolean = true
-//  }
   val listener = new CollisionListener {
-  override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture): Boolean = {
-    (body1.getUserData, body2.getUserData) match {
-      case (PlayerData(playerId), BulletData(_, bulletId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), PlayerData(playerId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), WallData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (BulletData(_, bulletId), DoorData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (DoorData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (WallData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (PlayerData(_), WallData(_)) =>
-        true
-      case (WallData(_), PlayerData(_)) =>
-        true
-      case x => false
+    def internalCollisionHandler(body1: Body, body2: Body) = {
+      (body1.getUserData, body2.getUserData) match {
+        case (PlayerData(playerId), BulletData(_, bulletId)) =>
+          handlePlayerDeath(playerId, bulletId)
+          false
+        case (BulletData(_, bulletId), PlayerData(playerId)) =>
+          handlePlayerDeath(playerId, bulletId)
+          false
+        case (BulletData(_, bulletId), WallData(_)) =>
+          handleBulletDisposal(bulletId)
+          false
+        case (BulletData(_, bulletId), DoorData(_)) =>
+          handleBulletDisposal(bulletId)
+          false
+        case (DoorData(_), BulletData(_, bulletId)) =>
+          handleBulletDisposal(bulletId)
+          false
+        case (WallData(_), BulletData(_, bulletId)) =>
+          handleBulletDisposal(bulletId)
+          false
+        case (PlayerData(_), WallData(_)) =>
+          true
+        case (WallData(_), PlayerData(_)) =>
+          true
+        case (PlayerData(_), DoorData(_)) =>
+          true
+        case (DoorData(_), PlayerData(_)) =>
+          true
+        case (DoorData(_), WallData(_)) =>
+          true
+        case (WallData(_), DoorData(_)) =>
+          true
+        case x => false
+      }
     }
-  }
+    override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture): Boolean =
+      internalCollisionHandler(body1, body2)
 
-  override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture, penetration: Penetration): Boolean = {
-    (body1.getUserData, body2.getUserData) match {
-      case (PlayerData(playerId), BulletData(_, bulletId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), PlayerData(playerId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), WallData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (BulletData(_, bulletId), DoorData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (DoorData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (WallData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (PlayerData(_), WallData(_)) =>
-        true
-      case (WallData(_), PlayerData(_)) =>
-        true
-      case x => false
-    }
-  }
+    override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture, penetration: Penetration): Boolean =
+      internalCollisionHandler(body1, body2)
 
-  override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture, manifold: Manifold): Boolean = {
-    (body1.getUserData, body2.getUserData) match {
-      case (PlayerData(playerId), BulletData(_, bulletId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), PlayerData(playerId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), WallData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (BulletData(_, bulletId), DoorData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (DoorData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (WallData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (PlayerData(_), WallData(_)) =>
-        true
-      case (WallData(_), PlayerData(_)) =>
-        true
-      case x => false
-    }
-  }
+    override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture, manifold: Manifold): Boolean =
+      internalCollisionHandler(body1, body2)
 
-  override def collision(contactConstraint: ContactConstraint): Boolean = {
-    (contactConstraint.getBody1.getUserData, contactConstraint.getBody2.getUserData) match {
-      case (PlayerData(playerId), BulletData(_, bulletId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), PlayerData(playerId)) =>
-        handlePlayerDeath(playerId, bulletId)
-        false
-      case (BulletData(_, bulletId), WallData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (BulletData(_, bulletId), DoorData(_)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (DoorData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (WallData(_), BulletData(_, bulletId)) =>
-        handleBulletDisposal(bulletId)
-        false
-      case (PlayerData(_), WallData(_)) =>
-        true
-      case (WallData(_), PlayerData(_)) =>
-        true
-      case x => false
-    }
+    override def collision(contactConstraint: ContactConstraint): Boolean =
+      internalCollisionHandler(contactConstraint.getBody1, contactConstraint.getBody2)
   }
-}
   world.addListener(listener)
 
   def addPlayer(player: Player): Unit = {
@@ -247,8 +169,9 @@ class Scene() {
   def updates: WorldUpdates = {
     world.getBodies.asScala.foldLeft(WorldUpdates())((acc: WorldUpdates, obj: Body) => {
       obj.getUserData match {
-        case x: PlayerData => WorldUpdates(acc.bodies + obj, acc.bullets)
-        case x: BulletData => WorldUpdates(acc.bodies, acc.bullets + obj)
+        case x: PlayerData => WorldUpdates(acc.bodies + obj, acc.bullets, acc.doors)
+        case x: BulletData => WorldUpdates(acc.bodies, acc.bullets + obj, acc.doors)
+        case x: DoorData => WorldUpdates(acc.bodies, acc.bullets, acc.doors + obj)
         case _ => acc
       }
     })

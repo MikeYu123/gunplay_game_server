@@ -70,7 +70,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val cancellable =
       system.scheduler.schedule(
         0 milliseconds,
-        50 milliseconds,
+        100 milliseconds,
         worldActor,
         Step)
 

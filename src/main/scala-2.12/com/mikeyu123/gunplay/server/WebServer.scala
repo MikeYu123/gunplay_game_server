@@ -48,14 +48,12 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val interface = "0.0.0.0"
     val port = 8090
     import akka.http.scaladsl.server.Directives._
-    val source = Source.actorRef[ClientMessage](0, OverflowStrategy.fail)
 
     val route = get {
       akka.http.scaladsl.server.Directives.handleWebSocketMessages(flow)
     } ~
       path("levels" / IntNumber) { index =>
         get {
-//          respondWithHeader(RawHeader("Access-Control-Allow-Origin", "http://localhost:8080")){
           respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")){
             complete(levels(0))
           }
@@ -73,17 +71,5 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
         50 milliseconds,
         worldActor,
         Step)
-
-    var line = StdIn.readLine()
-    while(line != "end") {
-      line = StdIn.readLine()
-    }
-
-//    bindingFuture
-//      .flatMap(_.unbind()) // trigger unbinding from the port
-//      .onComplete(_ => system.terminate()) // and shutdown when done
-//    StdIn.readLine()
-
-
   }
 

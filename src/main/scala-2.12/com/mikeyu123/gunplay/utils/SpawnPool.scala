@@ -30,5 +30,6 @@ object SpawnPool {
 }
 
 case class SpawnPool(poolSet: List[Point]) {
-  def randomSpawn: Point = poolSet(new SecureRandom().nextInt(poolSet.size))
+  val random = new Random(new SecureRandom())
+  def randomSpawn: Point = random.shuffle(poolSet).head
 }

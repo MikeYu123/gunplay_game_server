@@ -19,7 +19,7 @@ package object server {
   case class RegisterConnection(connection: ActorRef)
 // [[ClientConnectionActor]] sent message to [WorldActor] to add Body object
 //  TODO: point??
-  case class AddPlayer(uuid: UUID, x: Double, y: Double)
+  case class AddPlayer(x: Double, y: Double)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
   case class UpdateControls(velocity: Vector2, angle: Double)
   case class Registered(uuid: UUID)
@@ -30,6 +30,6 @@ package object server {
 
   case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double, click: Boolean)
   case object RegisterPlayer
-  case class ClientMessage(`type`: String, uuid: Option[String], message: Option[JsValue])
+  case class ClientMessage(`type`: String, message: Option[JsValue])
   case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject], doors: Set[MessageObject])
 }

@@ -52,11 +52,9 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
           }
         case "register" =>
           val spawnPoint: Point = SpawnPool.defaultPool.randomSpawn
-          json.uuid.foreach { uuid =>
 //            TODO: Exception check
-            val messageToSend = AddPlayer(UUID.fromString(uuid), spawnPoint.x, spawnPoint.y)
-            worldActor ! messageToSend
-          }
+          val messageToSend = AddPlayer(spawnPoint.x, spawnPoint.y)
+          worldActor ! messageToSend
       }
 
     case message: PublishUpdates =>

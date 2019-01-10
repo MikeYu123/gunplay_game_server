@@ -15,8 +15,8 @@ object ObjectsMarshaller {
   }
   implicit class MarshallableBody(body: Body) {
     def marshall: MessageObject  = {
-      val center = body.getWorldCenter
-      MessageObject(body.getId, center.x, center.y, body.getTorque)
+      val transform = body.getTransform
+      MessageObject(body.getId, transform.getTranslationX, transform.getTranslationY, transform.getRotation)
     }
   }
 }

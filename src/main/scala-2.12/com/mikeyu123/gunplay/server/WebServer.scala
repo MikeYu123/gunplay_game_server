@@ -44,7 +44,8 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
   }
 
     import akka.http.scaladsl.Http
-    val interface = "localhost"
+//    val interface = "localhost"
+    val interface = "0.0.0.0"
     val port = 8090
     import akka.http.scaladsl.server.Directives._
     val source = Source.actorRef[ClientMessage](0, OverflowStrategy.fail)
@@ -54,7 +55,8 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     } ~
       path("levels" / IntNumber) { index =>
         get {
-          respondWithHeader(RawHeader("Access-Control-Allow-Origin", "http://localhost:8080")){
+//          respondWithHeader(RawHeader("Access-Control-Allow-Origin", "http://localhost:8080")){
+          respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")){
             complete(levels(0))
           }
         }
@@ -68,7 +70,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val cancellable =
       system.scheduler.schedule(
         0 milliseconds,
-        100 milliseconds,
+        50 milliseconds,
         worldActor,
         Step)
 

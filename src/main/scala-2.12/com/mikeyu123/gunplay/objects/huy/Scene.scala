@@ -12,10 +12,12 @@ import com.mikeyu123.gunplay.server.Updates
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
+import org.dyn4j.collision.manifold.Manifold
+import org.dyn4j.collision.narrowphase.Penetration
 
 import scala.collection.JavaConverters._
-import org.dyn4j.dynamics.{Body, World}
-import org.dyn4j.dynamics.contact.{ContactListener, ContactPoint, PersistedContactPoint, SolvedContactPoint}
+import org.dyn4j.dynamics.{Body, BodyFixture, CollisionListener, World}
+import org.dyn4j.dynamics.contact._
 import org.dyn4j.geometry.Vector2
 
 object Scene {
@@ -44,14 +46,16 @@ object Scene {
 class Scene() {
   val world = new World()
   world.setGravity(new Vector2(0,0))
+  var bodiesToRemove = collection.mutable.Set[Body]()
 
 
   def handlePlayerDeath(playerId: UUID, bulletId: UUID) = {
     world.getBodies.asScala.filter(body => {
       val id = body.getId
-      id.equals(playerId) || id.equals(bulletId)
+      id.equals(bulletId) ||
+        id.equals(playerId)
     }).foreach(body => {
-      world.removeBody(body)
+      bodiesToRemove add body
     })
   }
 
@@ -60,50 +64,138 @@ class Scene() {
       val id = body.getId
       id.equals(bulletId)
     }).foreach(body => {
-      world.removeBody(body)
+      bodiesToRemove add body
     })
   }
-//
+
 //  val listener = new ContactListener {
 //    override def postSolve(point: SolvedContactPoint): Unit = {}
-
-//    override def preSolve(point: ContactPoint): Boolean = {
-//      (point.getBody1.getUserData, point.getBody2.getUserData) match {
-//        case (PlayerData(playerId), BulletData(_, bulletId)) =>
-//          handlePlayerDeath(playerId, bulletId)
-//          false
-//        case (BulletData(_, bulletId), PlayerData(playerId)) =>
-//          handlePlayerDeath(playerId, bulletId)
-//          false
-//        case (BulletData(_, bulletId), WallData(_)) =>
-//          handleBulletDisposal(bulletId)
-//          false
-//        case (BulletData(_, bulletId), DoorData(_)) =>
-//          handleBulletDisposal(bulletId)
-//          false
-//        case (DoorData(_), BulletData(_, bulletId)) =>
-//          handleBulletDisposal(bulletId)
-//          false
-//        case (WallData(_), BulletData(_, bulletId)) =>
-//          handleBulletDisposal(bulletId)
-//          false
-//        case (PlayerData(_), WallData(_)) =>
-//          true
-//        case (WallData(_), PlayerData(_)) =>
-//          true
-//        case _ => false
-//      }
-//    }
+//
+//    override def preSolve(point: ContactPoint): Boolean = true
 //
 //    override def sensed(point: ContactPoint): Unit = {}
 //
 //    override def end(point: ContactPoint): Unit = {}
 //
-//    override def persist(point: PersistedContactPoint): Boolean = true
+//
+//    override def persist(point: PersistedContactPoint): Boolean = false
 //
 //    override def begin(point: ContactPoint): Boolean = true
 //  }
-//  world.addListener(listener)
+  val listener = new CollisionListener {
+  override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture): Boolean = {
+    (body1.getUserData, body2.getUserData) match {
+      case (PlayerData(playerId), BulletData(_, bulletId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), PlayerData(playerId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), WallData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (BulletData(_, bulletId), DoorData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (DoorData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (WallData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (PlayerData(_), WallData(_)) =>
+        true
+      case (WallData(_), PlayerData(_)) =>
+        true
+      case x => false
+    }
+  }
+
+  override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture, penetration: Penetration): Boolean = {
+    (body1.getUserData, body2.getUserData) match {
+      case (PlayerData(playerId), BulletData(_, bulletId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), PlayerData(playerId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), WallData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (BulletData(_, bulletId), DoorData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (DoorData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (WallData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (PlayerData(_), WallData(_)) =>
+        true
+      case (WallData(_), PlayerData(_)) =>
+        true
+      case x => false
+    }
+  }
+
+  override def collision(body1: Body, fixture1: BodyFixture, body2: Body, fixture2: BodyFixture, manifold: Manifold): Boolean = {
+    (body1.getUserData, body2.getUserData) match {
+      case (PlayerData(playerId), BulletData(_, bulletId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), PlayerData(playerId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), WallData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (BulletData(_, bulletId), DoorData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (DoorData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (WallData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (PlayerData(_), WallData(_)) =>
+        true
+      case (WallData(_), PlayerData(_)) =>
+        true
+      case x => false
+    }
+  }
+
+  override def collision(contactConstraint: ContactConstraint): Boolean = {
+    (contactConstraint.getBody1.getUserData, contactConstraint.getBody2.getUserData) match {
+      case (PlayerData(playerId), BulletData(_, bulletId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), PlayerData(playerId)) =>
+        handlePlayerDeath(playerId, bulletId)
+        false
+      case (BulletData(_, bulletId), WallData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (BulletData(_, bulletId), DoorData(_)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (DoorData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (WallData(_), BulletData(_, bulletId)) =>
+        handleBulletDisposal(bulletId)
+        false
+      case (PlayerData(_), WallData(_)) =>
+        true
+      case (WallData(_), PlayerData(_)) =>
+        true
+      case x => false
+    }
+  }
+}
+  world.addListener(listener)
 
   def addPlayer(player: Player): Unit = {
     world.addBody(player.shape)
@@ -114,9 +206,13 @@ class Scene() {
       body =>
         body.getId.equals(uuid)
     }.foreach(player => {
-      val bullet = new Bullet(uuid, position = player.getWorldCenter, velocity = player.getLinearVelocity())
-      bullet.shape.translate(player.getLinearVelocity())
+//      TODO: recalculate velocity via angle
+      val bullet = new Bullet(uuid, position = player.getWorldCenter.add(new Vector2(10,10).rotate(player.getTransform.getRotation)), velocity = new Vector2(1, 0).rotate(player.getTransform.getRotation).product(10))
+      bullet.shape.getTransform.setRotation(player.getTransform.getRotation)
+      //  bullet.shape.translate(new Vector2(10,10).rotate(player.getTransform.getRotation))
+
       world.addBody(bullet.shape)
+      bullet.shape.setAsleep(false)
     })
   }
 
@@ -126,13 +222,17 @@ class Scene() {
         body.getId.equals(uuid)
     }.foreach(player => {
       player.setLinearVelocity(velocity)
-      player.setAngularVelocity(angular)
+//      player.setAngularVelocity(angular)
+//      player.applyTorque(angular)
+      player.getTransform.setRotation(angular)
       player.setAsleep(false)
     })
   }
 
   def step(): Unit = {
-    world.step(100)
+    world.step(150)
+    bodiesToRemove.foreach(world.removeBody)
+    bodiesToRemove.clear
   }
 
   def removePlayerById(uuid: UUID): Unit = {

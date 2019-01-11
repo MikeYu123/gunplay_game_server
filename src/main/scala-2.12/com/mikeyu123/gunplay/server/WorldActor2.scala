@@ -23,10 +23,10 @@ class WorldActor2(val scene: Scene) extends Actor {
     case AddPlayer(x, y) =>
       val s = sender()
       val player = new Player(position = new Vector2(x, y))
-      clients += (s -> player.shape.getId)
+      clients += (s -> player.getId)
       context.watch(s)
       scene.addPlayer(player)
-      s ! Registered(player.shape.getId)
+      s ! Registered(player.getId)
     case UpdateControls(velocity, angle) =>
 //      TODO: handle shit when no uuid
       val s = sender()

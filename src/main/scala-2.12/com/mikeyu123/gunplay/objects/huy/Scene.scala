@@ -3,11 +3,8 @@ package com.mikeyu123.gunplay.objects.huy
 import java.util.UUID
 
 import com.mikeyu123.gunplay.objects._
-import com.mikeyu123.gunplay.objects.huy.Bullet.BulletData
-import com.mikeyu123.gunplay.objects.huy.Door.{DoorData, Pin}
-import com.mikeyu123.gunplay.objects.huy.Player.PlayerData
+import com.mikeyu123.gunplay.objects.huy.Door.{Pin}
 import com.mikeyu123.gunplay.objects.huy.Scene.WorldUpdates
-import com.mikeyu123.gunplay.objects.huy.Wall.WallData
 import com.mikeyu123.gunplay.server.Updates
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
@@ -40,10 +37,10 @@ object Scene {
       new Door(doorData.width, doorData.height, new Vector2(doorData.x, doorData.y), new Vector2(0,0), Door.pin(doorData.pin))
     }
     val scene = new Scene()
-    walls.foreach(wall => scene.world.addBody(wall.shape))
+    walls.foreach(wall => scene.world.addBody(wall))
     doors.foreach(door => {
-      scene.world.addBody(door.shape)
-      scene.world.addBody(door.pinBody)
+      scene.world.addBody(door)
+      scene.world.addBody(door.pin)
       scene.world.addJoint(door.joint)
     })
     scene
@@ -58,7 +55,7 @@ class Scene() {
 
   def handlePlayerDeath(player: Body, bullet: Body) = {
 //    Check if body emitted by player
-    if(!bullet.getUserData.asInstanceOf[BulletData].emitent.equals(player.getId))
+    if(!bullet.asInstanceOf[Bullet].emitent.equals(player.getId))
       bodiesToRemove add player
   }
 
@@ -68,37 +65,42 @@ class Scene() {
 
   val listener = new CollisionListener {
     def internalCollisionHandler(body1: Body, body2: Body) = {
-      (body1.getUserData, body2.getUserData) match {
-        case (PlayerData(playerId), BulletData(_, bulletId)) =>
+      (body1, body2) match {
+        case (_: Player, _: Bullet) =>
           handlePlayerDeath(body1, body2)
           false
-        case (BulletData(_, bulletId), PlayerData(playerId)) =>
+        case (_: Bullet, _:Player) =>
           handlePlayerDeath(body2, body1)
           false
-        case (BulletData(_, bulletId), WallData(_)) =>
+        case (_: Bullet, _: Wall) =>
           handleBulletDisposal(body1)
           false
-        case (BulletData(_, bulletId), DoorData(_)) =>
+        case (_: Bullet, _: Door) =>
           handleBulletDisposal(body1)
           false
-        case (DoorData(_), BulletData(_, bulletId)) =>
+        case (_: Wall, _: Bullet) =>
+          handleBulletDisposal(body2)
+        case (_: Pin, _: Bullet) =>
+          handleBulletDisposal(body2)
+          true
+        case (_: Bullet, _: Pin) =>
+          handleBulletDisposal(body1)
+          true
+        case (_: Door, _: Bullet) =>
           handleBulletDisposal(body2)
           false
-        case (WallData(_), BulletData(_, bulletId)) =>
-          handleBulletDisposal(body2)
-          false
-        case (PlayerData(_), WallData(_)) =>
+        case (_: Player, _: Wall) =>
           true
-        case (WallData(_), PlayerData(_)) =>
+        case (_: Wall, _: Player) =>
           true
-        case (PlayerData(_), DoorData(_)) =>
+        case (_: Player, _: Door) =>
           true
-        case (DoorData(_), PlayerData(_)) =>
+        case (_: Door, _: Player) =>
           true
-        case (DoorData(_), WallData(_)) =>
+        case (_: Door, _: Wall) =>
 //          true
           false
-        case (WallData(_), DoorData(_)) =>
+        case (_: Wall, _: Door) =>
           false
 //          true
         case x => false
@@ -119,7 +121,7 @@ class Scene() {
   world.addListener(listener)
 
   def addPlayer(player: Player): Unit = {
-    world.addBody(player.shape)
+    world.addBody(player)
   }
 
   def emitBullet(uuid: UUID): Unit = {
@@ -129,11 +131,11 @@ class Scene() {
     }.foreach(player => {
 //      TODO: recalculate velocity via angle
       val bullet = new Bullet(uuid, position = player.getWorldCenter.add(new Vector2(10,0).rotate(player.getTransform.getRotation)), velocity = new Vector2(10, 0).rotate(player.getTransform.getRotation))
-      bullet.shape.getTransform.setRotation(player.getTransform.getRotation)
+      bullet.getTransform.setRotation(player.getTransform.getRotation)
       //  bullet.shape.translate(new Vector2(10,10).rotate(player.getTransform.getRotation))
 
-      world.addBody(bullet.shape)
-      bullet.shape.setAsleep(false)
+      world.addBody(bullet)
+      bullet.setAsleep(false)
     })
   }
 
@@ -167,10 +169,10 @@ class Scene() {
 
   def updates: WorldUpdates = {
     world.getBodies.asScala.foldLeft(WorldUpdates())((acc: WorldUpdates, obj: Body) => {
-      obj.getUserData match {
-        case x: PlayerData => WorldUpdates(acc.bodies + obj, acc.bullets, acc.doors)
-        case x: BulletData => WorldUpdates(acc.bodies, acc.bullets + obj, acc.doors)
-        case x: DoorData => WorldUpdates(acc.bodies, acc.bullets, acc.doors + obj)
+      obj match {
+        case x: Player => WorldUpdates(acc.bodies + obj, acc.bullets, acc.doors)
+        case x: Bullet => WorldUpdates(acc.bodies, acc.bullets + obj, acc.doors)
+        case x: Door => WorldUpdates(acc.bodies, acc.bullets, acc.doors + obj)
         case _ => acc
       }
     })

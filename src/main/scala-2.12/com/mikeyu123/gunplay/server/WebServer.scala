@@ -35,7 +35,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val c = client
     val in = Sink.actorRef(c, ConnectionClose)
 
-    val out = Source.actorRef(120, OverflowStrategy.fail).mapMaterializedValue { a =>
+    val out = Source.actorRef(12000, OverflowStrategy.fail).mapMaterializedValue { a =>
       c ! RegisterConnection(a)
       a
     }

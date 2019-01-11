@@ -8,7 +8,7 @@ import org.dyn4j.geometry.Vector2
   * Created by mihailurcenkov on 30.07.17.
   */
 object ControlsParser {
-  val stepSize: Double = 2d
+  val stepSize: Double = 4d
   def parseControls(controls: Controls): (Vector2, Double, Boolean) = {
 //    TODO: why -1?
     val dy = (if (controls.up) -stepSize else 0) + (if(controls.down) stepSize else 0)

@@ -51,9 +51,20 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
               worldActor ! EmitBullet
           }
         case "register" =>
+//          TODO REWORK THIS WHOLE
+          val name: String =
+            json.message.flatMap
+              { x => x.asJsObject
+                      .getFields("name")
+                      .headOption
+                      .map(_
+                        .asInstanceOf[JsString]
+                        .value)
+              }
+                .getOrElse("huy")
           val spawnPoint: Point = SpawnPool.defaultPool.randomSpawn
 //            TODO: Exception check
-          val messageToSend = AddPlayer(spawnPoint.x, spawnPoint.y)
+          val messageToSend = AddPlayer(name, spawnPoint.x, spawnPoint.y)
           worldActor ! messageToSend
       }
 

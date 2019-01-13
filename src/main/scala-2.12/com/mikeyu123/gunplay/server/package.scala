@@ -19,7 +19,7 @@ package object server {
   case class RegisterConnection(connection: ActorRef)
 // [[ClientConnectionActor]] sent message to [WorldActor] to add Body object
 //  TODO: point??
-  case class AddPlayer(x: Double, y: Double)
+  case class AddPlayer(name: String, x: Double, y: Double)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
   case class UpdateControls(velocity: Vector2, angle: Double)
   case class Registered(uuid: UUID)

@@ -26,10 +26,10 @@ class WorldActor2(val scene: Scene) extends Actor {
 
 
   override def receive: Receive = {
-    case AddPlayer(x, y) =>
+    case AddPlayer(name, x, y) =>
       val s = sender()
       val player = new Player(position = new Vector2(x, y))
-      val leaderBoardEntry = LeaderBoardEntry()
+      val leaderBoardEntry = LeaderBoardEntry(name = name)
       clients += (s -> leaderBoardEntry.id)
       leaderBoard += (leaderBoardEntry.id -> leaderBoardEntry)
       bodies += (leaderBoardEntry.id -> player.getId)

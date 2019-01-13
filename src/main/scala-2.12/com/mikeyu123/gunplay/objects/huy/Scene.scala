@@ -3,8 +3,8 @@ package com.mikeyu123.gunplay.objects.huy
 import java.util.UUID
 
 import com.mikeyu123.gunplay.objects._
-import com.mikeyu123.gunplay.objects.huy.Door.{Pin}
-import com.mikeyu123.gunplay.objects.huy.Scene.WorldUpdates
+import com.mikeyu123.gunplay.objects.huy.Door.Pin
+import com.mikeyu123.gunplay.objects.huy.Scene.{Murder, WorldUpdates}
 import com.mikeyu123.gunplay.server.Updates
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
@@ -20,6 +20,7 @@ import org.dyn4j.geometry.Vector2
 import scala.collection.mutable
 
 object Scene {
+  case class Murder(killer: UUID, victim: UUID)
   case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Body] = Set(), doors: Set[Body] = Set()) {
     def marshall : Updates = {
       Updates(
@@ -51,12 +52,17 @@ class Scene() {
   val world = new World()
   world.setGravity(new Vector2(0,0))
   var bodiesToRemove = collection.mutable.Set[Body]()
+  val murders = collection.mutable.Set[Murder]()
 
 
   def handlePlayerDeath(player: Body, bullet: Body) = {
 //    Check if body emitted by player
-    if(!bullet.asInstanceOf[Bullet].emitent.equals(player.getId))
+    val emitentId = bullet.asInstanceOf[Bullet].emitent
+    val playerId = player.getId
+    if(!emitentId.equals(playerId)) {
       bodiesToRemove add player
+      murders.add(Murder(emitentId, playerId))
+    }
   }
 
   def handleBulletDisposal(bullet: Body) = {
@@ -152,10 +158,13 @@ class Scene() {
     })
   }
 
-  def step(): Unit = {
+  def step(): Set[Murder] = {
     world.step(150)
     bodiesToRemove.foreach(world.removeBody)
     bodiesToRemove.clear
+    val returnSet: Set[Scene.Murder] = murders.toSet
+    murders.clear()
+    returnSet
   }
 
   def removePlayerById(uuid: UUID): Unit = {

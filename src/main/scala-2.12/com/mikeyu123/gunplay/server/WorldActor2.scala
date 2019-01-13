@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Terminated}
 import com.mikeyu123.gunplay.objects._
+import com.mikeyu123.gunplay.objects.huy.Scene.Murder
 import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderBoardEntry
 import org.dyn4j.geometry.Vector2
@@ -24,6 +25,20 @@ class WorldActor2(val scene: Scene) extends Actor {
   var bodies: Map[UUID, UUID] = Map()
   var leaderBoard: Map[UUID, LeaderBoardEntry] = Map()
 
+  def processMurders(murders: Set[Murder]) = {
+    murders.foreach(murder => {
+      val killerId = bodies.find(_._2.equals(murder.killer)).map(_._1)
+      val victimId = bodies.find(_._2.equals(murder.victim)).map(_._1)
+      for {
+        id <- killerId
+        entry <- leaderBoard.get(id)
+      } leaderBoard += (id -> entry.copy(kills = entry.kills + 1))
+      for {
+        id <- victimId
+        entry <- leaderBoard.get(id)
+      } leaderBoard += (id -> entry.copy(deaths = entry.deaths - 1))
+    })
+  }
 
   override def receive: Receive = {
     case AddPlayer(name, x, y) =>
@@ -47,7 +62,9 @@ class WorldActor2(val scene: Scene) extends Actor {
 //      TODO respawn
       scene.emitBullet(uuid)
     case Step =>
-      scene.step()
+      val murders = scene.step()
+      processMurders(murders)
+      println(leaderBoard)
       val updates = scene.updates.marshall
 //      TODO this is huevo, ideas:
 //      1) inverted bodies collection

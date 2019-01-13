@@ -7,6 +7,8 @@ import com.mikeyu123.gunplay.objects._
 import com.mikeyu123.gunplay.objects.huy.Scene.Murder
 import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderBoardEntry
+import com.mikeyu123.gunplay.utils.SpawnPool
+import com.mikeyu123.gunplay_physics.structs.Point
 import org.dyn4j.geometry.Vector2
 
 /**
@@ -36,7 +38,10 @@ class WorldActor2(val scene: Scene) extends Actor {
       for {
         id <- victimId
         entry <- leaderBoard.get(id)
-      } leaderBoard += (id -> entry.copy(deaths = entry.deaths - 1))
+      } {
+        leaderBoard += (id -> entry.copy(deaths = entry.deaths - 1))
+        bodies -= id
+      }
     })
   }
 
@@ -54,17 +59,32 @@ class WorldActor2(val scene: Scene) extends Actor {
     case UpdateControls(velocity, angle) =>
 //      TODO: handle shit when no uuid
       val s = sender()
-      val uuid: UUID = bodies(clients(s))
-      scene.updateControls(uuid, velocity, angle)
+      val uuid: Option[UUID] = bodies.get(clients(s))
+      for {
+        client <- clients.get(s)
+        uuid <- bodies.get(client)
+      } scene.updateControls(uuid, velocity, angle)
     case EmitBullet =>
       //      TODO: handle shit when no uuid
-      val uuid: UUID = bodies(clients(sender()))
+//      TODO TEST THIS
+      val s = sender()
+      val uuidOption: Option[UUID] =
+        for {
+          client <- clients get s
+          body <- bodies get client
+        } yield body
+      uuidOption match {
+        case Some(uuid) => scene.emitBullet(uuid)
+        case None =>
+          val Point(x, y) = SpawnPool.defaultPool.randomSpawn
+          val player = new Player(position = new Vector2(x,y))
+          bodies += (clients(s) -> player.getId)
+          scene.addPlayer(player)
+      }
 //      TODO respawn
-      scene.emitBullet(uuid)
     case Step =>
       val murders = scene.step()
       processMurders(murders)
-      println(leaderBoard)
       val updates = scene.updates.marshall
 //      TODO this is huevo, ideas:
 //      1) inverted bodies collection

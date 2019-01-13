@@ -89,7 +89,7 @@ class WorldActor2(val scene: Scene) extends Actor {
 //      TODO this is huevo, ideas:
 //      1) inverted bodies collection
 //      2) some extra serialization logix
-      val pimpedUpdates = updates.copy(bodies = updates.bodies.map(body => {
+      val pimpedUpdates: Updates = updates.copy(leaderBoard = leaderBoard.values.toSet, bodies = updates.bodies.map(body => {
         bodies.find(_._2 equals body.uuid).fold(body)((x: (UUID, UUID)) => body.copy(uuid = x._1))
       }))
 //      clients.foreach { _._1 ! PublishUpdates(updates) }

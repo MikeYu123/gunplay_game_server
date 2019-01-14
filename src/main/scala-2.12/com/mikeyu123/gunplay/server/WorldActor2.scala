@@ -39,7 +39,7 @@ class WorldActor2(val scene: Scene) extends Actor {
         id <- victimId
         entry <- leaderBoard.get(id)
       } {
-        leaderBoard += (id -> entry.copy(deaths = entry.deaths - 1))
+        leaderBoard += (id -> entry.copy(deaths = entry.deaths + 1))
         bodies -= id
       }
     })
@@ -59,7 +59,6 @@ class WorldActor2(val scene: Scene) extends Actor {
     case UpdateControls(velocity, angle) =>
 //      TODO: handle shit when no uuid
       val s = sender()
-      val uuid: Option[UUID] = bodies.get(clients(s))
       for {
         client <- clients.get(s)
         uuid <- bodies.get(client)
@@ -76,10 +75,15 @@ class WorldActor2(val scene: Scene) extends Actor {
       uuidOption match {
         case Some(uuid) => scene.emitBullet(uuid)
         case None =>
-          val Point(x, y) = SpawnPool.defaultPool.randomSpawn
-          val player = new Player(position = new Vector2(x,y))
-          bodies += (clients(s) -> player.getId)
-          scene.addPlayer(player)
+          for {
+            client <- clients get s
+          } {
+            val Point(x, y) = SpawnPool.defaultPool.randomSpawn
+            val player = new Player(position = new Vector2(x, y))
+            //          TODO this throws
+            bodies += (client -> player.getId)
+            scene.addPlayer(player)
+          }
       }
 //      TODO respawn
     case Step =>
@@ -99,6 +103,7 @@ class WorldActor2(val scene: Scene) extends Actor {
 //      TODO: remove body from world
       scene removePlayerById bodies(clients(client))
       leaderBoard -= clients(client)
+      bodies -= bodies(clients(client))
       clients -= client
     case _ =>
   }

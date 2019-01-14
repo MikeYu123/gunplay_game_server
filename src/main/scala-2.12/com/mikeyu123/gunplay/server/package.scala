@@ -32,5 +32,5 @@ package object server {
   case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double, click: Boolean)
   case object RegisterPlayer
   case class ClientMessage(`type`: String, message: Option[JsValue])
-  case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject], doors: Set[MessageObject], leaderBoard: Set[LeaderBoardEntry] = Set())
+  case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject], doors: Set[MessageObject], leaderBoard: Seq[LeaderBoardEntry] = Seq())
 }

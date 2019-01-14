@@ -101,9 +101,13 @@ class WorldActor2(val scene: Scene) extends Actor {
     case Terminated(client) =>
 //      println(s"terminated ${clients(client)}")
 //      TODO: remove body from world
-      scene removePlayerById bodies(clients(client))
-      leaderBoard -= clients(client)
-      bodies -= bodies(clients(client))
+      val clientOption = clients.get(client)
+      clientOption.foreach(leaderBoard -= _)
+      val bodyOption = clientOption.flatMap(bodies.get)
+      bodyOption foreach { body =>
+        bodies -= body
+        scene removePlayerById body
+      }
       clients -= client
     case _ =>
   }

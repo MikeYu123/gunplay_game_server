@@ -10,6 +10,8 @@ import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
 import org.dyn4j.geometry.Vector2
 import spray.json._
 
+import scala.util.Try
+
 /**
   * Created by mihailurcenkov on 25.07.17.
   */
@@ -54,14 +56,13 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
 //          TODO REWORK THIS WHOLE
           val name: String =
             json.message.flatMap
-              { x => x.asJsObject
-                      .getFields("name")
-                      .headOption
-                      .map(_
-                        .asInstanceOf[JsString]
-                        .value)
-              }
-                .getOrElse("huy")
+              { x => Try[String] {
+                  x.asJsObject
+                    .getFields("name")
+                    .headOption
+                    .get.asInstanceOf[JsString].value
+                }.toOption
+              }.getOrElse("huy")
           val spawnPoint: Point = SpawnPool.defaultPool.randomSpawn
 //            TODO: Exception check
           val messageToSend = AddPlayer(name, spawnPoint.x, spawnPoint.y)

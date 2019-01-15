@@ -45,6 +45,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
       json.`type` match {
         case "controls" =>
           json.message.foreach { message =>
+//            TODO this fails if message is broken
             val controls: Controls = message.convertTo[Controls]
             val (velocity: Vector2, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
             val messageToSend: UpdateControls = UpdateControls(velocity, angle)

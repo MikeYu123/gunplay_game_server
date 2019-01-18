@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit
 import com.mikeyu123.gunplay.utils.Vector2
 
 
+//TODO val
 object Pistol {
   def apply(span: Long = 200, ammo: Double = Double.PositiveInfinity) = new Pistol(span, ammo)
 }

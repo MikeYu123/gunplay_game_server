@@ -37,7 +37,7 @@ object Scene {
     val doors = level.doors.map { doorData =>
       new Door(doorData.width, doorData.height, Vector2(doorData.x, doorData.y), Vector2(0,0), Door.pin(doorData.pin))
     }
-    val scene = new Scene()
+    val scene = new Scene(SpawnPool(level.spawns))
     walls.foreach(wall => scene.world.addBody(wall))
     doors.foreach(door => {
       scene.world.addBody(door)

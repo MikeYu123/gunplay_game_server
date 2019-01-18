@@ -9,13 +9,13 @@ import com.mikeyu123.gunplay.server.Updates
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
+import com.mikeyu123.gunplay.utils.{SpawnPool, Vector2}
 import org.dyn4j.collision.manifold.Manifold
 import org.dyn4j.collision.narrowphase.Penetration
 
 import scala.collection.JavaConverters._
 import org.dyn4j.dynamics._
 import org.dyn4j.dynamics.contact._
-import org.dyn4j.geometry.Vector2
 
 import scala.collection.mutable
 
@@ -32,10 +32,10 @@ object Scene {
   }
   def fromLevel(level: LevelData): Scene = {
     val walls = level.walls.map { wallData =>
-      new Wall(wallData.width, wallData.height, new Vector2(wallData.x, wallData.y), new Vector2(0,0))
+      new Wall(wallData.width, wallData.height, Vector2(wallData.x, wallData.y), Vector2(0,0))
     }
     val doors = level.doors.map { doorData =>
-      new Door(doorData.width, doorData.height, new Vector2(doorData.x, doorData.y), new Vector2(0,0), Door.pin(doorData.pin))
+      new Door(doorData.width, doorData.height, Vector2(doorData.x, doorData.y), Vector2(0,0), Door.pin(doorData.pin))
     }
     val scene = new Scene()
     walls.foreach(wall => scene.world.addBody(wall))
@@ -48,9 +48,9 @@ object Scene {
   }
 }
 
-class Scene() {
+class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool) {
   val world = new World()
-  world.setGravity(new Vector2(0,0))
+  world.setGravity(Vector2(0,0))
   var bodiesToRemove = collection.mutable.Set[Body]()
   val murders = collection.mutable.Set[Murder]()
 
@@ -126,8 +126,10 @@ class Scene() {
   }
   world.addListener(listener)
 
-  def addPlayer(player: Player): Unit = {
+  def addPlayer: Player = {
+    val player = Player(position = spawnPool.randomSpawn)
     world.addBody(player)
+    player
   }
 
   def emitBullet(uuid: UUID): Unit = {
@@ -136,7 +138,7 @@ class Scene() {
         body.getId.equals(uuid)
     }.foreach(player => {
 //      TODO: recalculate velocity via angle
-      val bullet = new Bullet(uuid, position = player.getWorldCenter.add(new Vector2(10,0).rotate(player.getTransform.getRotation)), velocity = new Vector2(10, 0).rotate(player.getTransform.getRotation))
+      val bullet = new Bullet(uuid, position = player.getWorldCenter.add(Vector2(10,0).rotate(player.getTransform.getRotation)), velocity = Vector2(10, 0).rotate(player.getTransform.getRotation))
       bullet.getTransform.setRotation(player.getTransform.getRotation)
       //  bullet.shape.translate(new Vector2(10,10).rotate(player.getTransform.getRotation))
 
@@ -158,7 +160,7 @@ class Scene() {
     })
   }
 
-  def step(): Set[Murder] = {
+  def step: Set[Murder] = {
     world.step(150)
     bodiesToRemove.foreach(world.removeBody)
     bodiesToRemove.clear

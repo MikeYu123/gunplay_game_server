@@ -2,8 +2,6 @@ package com.mikeyu123.gunplay.utils
 
 import java.security.SecureRandom
 
-import com.mikeyu123.gunplay_physics.structs.Point
-
 import scala.util.Random
 
 /**
@@ -11,25 +9,24 @@ import scala.util.Random
   */
 object SpawnPool {
 //  TODO make it configurable
-  val defaultPoolSet: List[Point] = List(
-    Point(-50, 50),
-    Point(50, -50),
-    Point(50, 50),
-    Point(-50, -50),
-    Point(250, 250),
-    Point(-250, -250),
-    Point(-250, 250),
-    Point(250, -250),
-    Point(650, 650),
-    Point(-650, -250),
-    Point(-650, 650),
-    Point(650, -650)
+  val defaultPoolSet: Set[Vector2] = Set(
+    Vector2(-50, 50),
+    Vector2(50, -50),
+    Vector2(50, 50),
+    Vector2(-50, -50),
+    Vector2(250, 250),
+    Vector2(-250, -250),
+    Vector2(-250, 250),
+    Vector2(250, -250),
+    Vector2(650, 650),
+    Vector2(-650, -250),
+    Vector2(-650, 650),
+    Vector2(650, -650)
   )
 
   val defaultPool = new SpawnPool(defaultPoolSet)
 }
 
-case class SpawnPool(poolSet: List[Point]) {
-  val random = new Random(new SecureRandom())
-  def randomSpawn: Point = random.shuffle(poolSet).head
+case class SpawnPool(poolSet: Set[Vector2], random: Random = new Random(new SecureRandom())) {
+  def randomSpawn: Vector2 = random.shuffle(poolSet).head
 }

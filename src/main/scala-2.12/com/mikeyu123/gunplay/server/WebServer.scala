@@ -26,7 +26,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   val levels = ConfigFactory.load("levels").as[List[LevelData]]("levels")
-  val worldActor = system.actorOf(Props(classOf[WorldActor2], Scene.fromLevel(levels(0))))
+  val worldActor = system.actorOf(Props(classOf[WorldActor], Scene.fromLevel(levels(0))).withMailbox("world-actor-mailbox"))
 //  TODO probably decouple clients and worldActor
   def client = system.actorOf(Props(classOf[ClientConnectionActor], worldActor))
 

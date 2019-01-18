@@ -2,9 +2,10 @@ package com.mikeyu123.gunplay.objects.huy
 
 import java.util.UUID
 
-import org.dyn4j.geometry.{Geometry, MassType, Vector2}
+import org.dyn4j.geometry.{Geometry, MassType}
 import Door.{Pin, defaultHeight, defaultWidth}
 import com.mikeyu123.gunplay.utils.LevelParser.PinData
+import com.mikeyu123.gunplay.utils.Vector2
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.joint.RevoluteJoint
 
@@ -23,8 +24,8 @@ object Door {
 }
 class Door(width: Double = defaultWidth,
            height: Double = defaultHeight,
-           position: Vector2 = new Vector2(0, 0),
-           velocity: Vector2 = new Vector2(0, 0),
+           position: Vector2 = Vector2(0, 0),
+           velocity: Vector2 = Vector2(0, 0),
            val pin: Pin) extends Body{
   addFixture(Geometry.createRectangle(width, height))
   setLinearVelocity(velocity)
@@ -32,7 +33,7 @@ class Door(width: Double = defaultWidth,
   setAngularVelocity(0.0)
   setAngularDamping(.2)
   setMass(MassType.NORMAL)
-  val joint = new RevoluteJoint(this, pin, new Vector2(pin.x, pin.y))
+  val joint = new RevoluteJoint(this, pin, Vector2(pin.x, pin.y))
   joint.setLimitEnabled(true)
   joint.setLimits(-Math.PI / 2, Math.PI / 2)
 }

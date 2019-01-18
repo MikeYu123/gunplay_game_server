@@ -19,7 +19,13 @@ object WorldActor {
   case class LeaderBoardEntry(id: UUID = UUID.randomUUID, name: String = "", kills: Int = 0, deaths: Int = 0)
 }
 
-class WorldActor2(val scene: Scene) extends Actor {
+class WorldActor(val scene: Scene) extends Actor {
+  def ptime[F](name: String, f: => F) = {
+    val t0 = System.nanoTime
+    val ans = f
+    printf("%s Elapsed: %.3f s\n", name,  1e-9*(System.nanoTime-t0))
+    ans
+  }
 //  TODO: move to world constructor
   def this() = this(new Scene())
 //  TODO: maybe mutable map?
@@ -46,48 +52,33 @@ class WorldActor2(val scene: Scene) extends Actor {
   }
 
   override def receive: Receive = {
-    case AddPlayer(name, x, y) =>
+    case AddPlayer(name) =>
       val s = sender()
-      val player = new Player(position = new Vector2(x, y))
+      val player = scene.addPlayer
       val leaderBoardEntry = LeaderBoardEntry(name = name)
       clients += (s -> leaderBoardEntry.id)
       leaderBoard += (leaderBoardEntry.id -> leaderBoardEntry)
       bodies += (leaderBoardEntry.id -> player.getId)
       context.watch(s)
-      scene.addPlayer(player)
       s ! Registered(leaderBoardEntry.id)
-    case UpdateControls(velocity, angle) =>
+    case UpdateControls(velocity, angle, click) =>
 //      TODO: handle shit when no uuid
       val s = sender()
-      for {
-        client <- clients.get(s)
-        uuid <- bodies.get(client)
-      } scene.updateControls(uuid, velocity, angle)
-    case EmitBullet =>
-      //      TODO: handle shit when no uuid
-//      TODO TEST THIS
-      val s = sender()
-      val uuidOption: Option[UUID] =
-        for {
-          client <- clients get s
-          body <- bodies get client
-        } yield body
+      val clientOption: Option[UUID] = clients.get(s)
+      val uuidOption: Option[UUID] = clientOption.flatMap(bodies.get)
       uuidOption match {
-        case Some(uuid) => scene.emitBullet(uuid)
+        case Some(uuid) =>
+          scene.updateControls(uuid, velocity, angle)
+          if(click)
+            scene.emitBullet(uuid)
         case None =>
-          for {
-            client <- clients get s
-          } {
-            val Point(x, y) = SpawnPool.defaultPool.randomSpawn
-            val player = new Player(position = new Vector2(x, y))
-            //          TODO this throws
+          clientOption foreach { client =>
+            val player = scene.addPlayer
             bodies += (client -> player.getId)
-            scene.addPlayer(player)
           }
       }
-//      TODO respawn
     case Step =>
-      val murders = scene.step()
+      val murders = scene.step
       processMurders(murders)
       val updates = scene.updates.marshall
 //      TODO this is huevo, ideas:
@@ -97,7 +88,6 @@ class WorldActor2(val scene: Scene) extends Actor {
       val pimpedUpdates: Updates = updates.copy(leaderBoard = leaderBoardData, bodies = updates.bodies.map(body => {
         bodies.find(_._2 equals body.uuid).fold(body)((x: (UUID, UUID)) => body.copy(uuid = x._1))
       }))
-//      clients.foreach { _._1 ! PublishUpdates(updates) }
       clients.foreach { _._1 ! PublishUpdates(pimpedUpdates) }
     case Terminated(client) =>
 //      println(s"terminated ${clients(client)}")

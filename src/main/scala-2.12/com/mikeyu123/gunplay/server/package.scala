@@ -5,8 +5,8 @@ import java.util.UUID
 import akka.actor.ActorRef
 import com.mikeyu123.gunplay.server.WorldActor.LeaderBoardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject
+import com.mikeyu123.gunplay.utils.Vector2
 import com.mikeyu123.gunplay_physics.structs.Vector
-import org.dyn4j.geometry.Vector2
 import spray.json.JsValue
 
 /**
@@ -20,9 +20,9 @@ package object server {
   case class RegisterConnection(connection: ActorRef)
 // [[ClientConnectionActor]] sent message to [WorldActor] to add Body object
 //  TODO: point??
-  case class AddPlayer(name: String, x: Double, y: Double)
+  case class AddPlayer(name: String)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
-  case class UpdateControls(velocity: Vector2, angle: Double)
+  case class UpdateControls(velocity: Vector2, angle: Double, click: Boolean)
   case class Registered(uuid: UUID)
   case object EmitBullet
   case object Step

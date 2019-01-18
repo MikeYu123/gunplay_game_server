@@ -5,9 +5,8 @@ import java.util.UUID
 import akka.actor.{Actor, ActorRef, Terminated}
 import akka.http.scaladsl.model.ws.TextMessage
 import com.mikeyu123.gunplay.server.messaging.{JsonProtocol, ObjectsMarshaller}
-import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool}
+import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
-import org.dyn4j.geometry.Vector2
 import spray.json._
 
 import scala.util.Try
@@ -15,9 +14,8 @@ import scala.util.Try
 /**
   * Created by mihailurcenkov on 25.07.17.
   */
-
-
-
+case class RegisteredMessage(id: UUID, registered: Boolean = true)
+case class Register(name: Option[String] = None)
 class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtocol {
   //TODO possibly move connection to constructor to avoid Option handling
   var connection: Option[ActorRef] = None
@@ -48,25 +46,15 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
 //            TODO this fails if message is broken
             val controls: Controls = message.convertTo[Controls]
             val (velocity: Vector2, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
-            val messageToSend: UpdateControls = UpdateControls(velocity, angle)
+            val messageToSend: UpdateControls = UpdateControls(velocity, angle, click)
             worldActor ! messageToSend
-            if(click)
-              worldActor ! EmitBullet
           }
         case "register" =>
 //          TODO REWORK THIS WHOLE
           val name: String =
-            json.message.flatMap
-              { x => Try[String] {
-                  x.asJsObject
-                    .getFields("name")
-                    .headOption
-                    .get.asInstanceOf[JsString].value
-                }.toOption
-              }.getOrElse("huy")
-          val spawnPoint: Point = SpawnPool.defaultPool.randomSpawn
+            json.message.flatMap(_.convertTo[Register].name).getOrElse("huy")
 //            TODO: Exception check
-          val messageToSend = AddPlayer(name, spawnPoint.x, spawnPoint.y)
+          val messageToSend = AddPlayer(name)
           worldActor ! messageToSend
       }
 
@@ -80,7 +68,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
 //      println(s"registered $uuid")
       connection foreach {
         conn =>
-          val messageToSend = JsObject(("registered", JsBoolean(true)), ("id", JsString(uuid.toString))).toJson.toString
+          val messageToSend = RegisteredMessage(uuid).toJson.toString
           conn ! TextMessage.Strict(messageToSend)
       }
 

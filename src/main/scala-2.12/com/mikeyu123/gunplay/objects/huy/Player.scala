@@ -26,6 +26,9 @@ class Player(width: Double = defaultWidth,
              position: Vector2 = Vector2(0, 0),
              velocity: Vector2 = Vector2(0,0))
       extends Body() {
+  var weapon: Option[Weapon] = None
+
+  def emitBullets: Set[Bullet] = weapon.fold(Set[Bullet]())(_.emit(this))
   addFixture(Geometry.createRectangle(width, height))
   setLinearVelocity(velocity)
   translate(position)

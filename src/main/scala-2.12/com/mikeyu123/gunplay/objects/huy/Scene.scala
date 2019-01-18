@@ -128,6 +128,7 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool) {
 
   def addPlayer: Player = {
     val player = Player(position = spawnPool.randomSpawn)
+    player.weapon = Some(Pistol())
     world.addBody(player)
     player
   }
@@ -138,12 +139,9 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool) {
         body.getId.equals(uuid)
     }.foreach(player => {
 //      TODO: recalculate velocity via angle
-      val bullet = new Bullet(uuid, position = player.getWorldCenter.add(Vector2(10,0).rotate(player.getTransform.getRotation)), velocity = Vector2(10, 0).rotate(player.getTransform.getRotation))
-      bullet.getTransform.setRotation(player.getTransform.getRotation)
-      //  bullet.shape.translate(new Vector2(10,10).rotate(player.getTransform.getRotation))
-
-      world.addBody(bullet)
-      bullet.setAsleep(false)
+      for {
+        bullet <- player.asInstanceOf[Player].emitBullets
+      } world.addBody(bullet)
     })
   }
 

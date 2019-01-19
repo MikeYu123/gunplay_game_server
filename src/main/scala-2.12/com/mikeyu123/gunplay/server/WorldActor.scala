@@ -3,14 +3,16 @@ package com.mikeyu123.gunplay.server
 import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Terminated}
+import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
 import com.mikeyu123.gunplay.objects._
-import com.mikeyu123.gunplay.objects.huy.Scene.Murder
+import com.mikeyu123.gunplay.objects.huy.Scene.{Murder, WorldUpdates}
 import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
 import com.mikeyu123.gunplay.server.ClientConnectionActor.{Leaderboard, Registered, Updates}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay.utils.SpawnPool
 import com.mikeyu123.gunplay_physics.structs.Point
+import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Vector2
 
 /**
@@ -79,26 +81,28 @@ class WorldActor(val scene: Scene) extends Actor {
     case Step =>
       val murders = scene.step
       processMurders(murders)
-      val updates: Updates = scene.updates.marshall
+      val updates: WorldUpdates = scene.updates
+      val bodyUpdates = updates.bodies.map(_.marshall)
+      val bulletUpdates = updates.bullets.map(_.marshall)
+      val doorUpdates = updates.doors.map(_.marshall)
 //      TODO this is huevo, ideas:
 //      1) inverted bodies collection
 //      2) some extra serialization logix
       val leaderboardData = leaderboard.values.toSeq.sortBy(-_.kills)
-//      reset uuids
-      val pimpedBodies = updates.bodies.map(
-        body => {
-          val bodyOption: Option[(UUID, UUID)] = bodies.find(_._2 equals body.uuid)
-          bodyOption.fold(body)((x: (UUID, UUID)) => body.copy(uuid = x._1))
-        }
-      )
-      val pimpedUpdates: Updates = updates.copy(bodies = pimpedBodies)
 
       val publishLeaderboard = murders.nonEmpty
       val leaderboardObject = Leaderboard(leaderboardData)
-      clients.keys.foreach { c =>
-        c ! pimpedUpdates
+      clients.foreach { x =>
+        val (client, id) = x
+        val bodyOption: Option[Body] = bodies.get(id).flatMap(uuid => updates.bodies.find(b => b.getId equals uuid))
+        val pimpedBodyUpdates = bodyOption.fold(bodyUpdates)(body => {
+          (updates.bodies - body).map(_.marshall)
+        })
+        val updatesObject = Updates(pimpedBodyUpdates, bulletUpdates, doorUpdates, bodyOption.map(_.marshall))
+        client ! updatesObject
+
         if (publishLeaderboard)
-          c ! leaderboardObject
+          client ! leaderboardObject
       }
     case Terminated(client) =>
 //      println(s"terminated ${clients(client)}")

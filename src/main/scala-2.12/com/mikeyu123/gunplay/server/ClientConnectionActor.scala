@@ -23,7 +23,8 @@ object ClientConnectionActor {
   case class Updates(
               bodies: Set[MessageObject],
               bullets: Set[MessageObject],
-              doors: Set[MessageObject]) extends ServerMessage
+              doors: Set[MessageObject],
+              player: Option[MessageObject] = None) extends ServerMessage
   case class Leaderboard(entries: Seq[LeaderboardEntry] = Seq()) extends ServerMessage
 
 

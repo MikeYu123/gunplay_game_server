@@ -13,7 +13,7 @@ object ObjectsMarshaller {
     def marshall: MessageObject  = {
       val transform = body.getTransform
       val shape = body.getFixture(0).getShape.asInstanceOf[Rectangle]
-      MessageObject(body.getId, transform.getTranslationX, transform.getTranslationY, transform.getRotation, shape.getWidth, shape.getHeight)
+      MessageObject(transform.getTranslationX, transform.getTranslationY, transform.getRotation, shape.getWidth, shape.getHeight)
     }
   }
 }

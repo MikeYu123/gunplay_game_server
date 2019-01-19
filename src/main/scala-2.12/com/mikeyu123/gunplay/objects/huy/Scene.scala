@@ -21,15 +21,7 @@ import scala.collection.mutable
 
 object Scene {
   case class Murder(killer: UUID, victim: UUID)
-  case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Body] = Set(), doors: Set[Body] = Set()) {
-    def marshall : Updates = {
-      Updates(
-        bodies.map(_.marshall),
-        bullets.map(_.marshall),
-        doors.map(_.marshall)
-      )
-    }
-  }
+  case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Body] = Set(), doors: Set[Body] = Set())
   def fromLevel(level: LevelData): Scene = {
     val walls = level.walls.map { wallData =>
       new Wall(wallData.width, wallData.height, Vector2(wallData.x, wallData.y), Vector2(0,0))

@@ -21,16 +21,20 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
     def read(value: JsValue) = defaultFormat.read(value)
   }
 
-  implicit val messageObjectFormat = jsonFormat6(MessageObject)
+  implicit val messageObjectFormat = jsonFormat5(MessageObject)
 
   implicit object UpdatesMessageFormat extends JsonFormat[Updates] {
     val setFormat = implicitly[JsonFormat[Set[MessageObject]]]
-    val defaultFormat = jsonFormat3(Updates)
+//    TODO make it work
+//    val optionFormat = implicitly[JsonFormat[Option[MessageObject]]]
+    val defaultFormat = jsonFormat4(Updates)
     def write(updates: Updates) = {
       JsObject("type" -> JsString("updates"),
         "bodies" -> setFormat.write(updates.bodies),
         "bullets" -> setFormat.write(updates.bullets),
-        "doors" -> setFormat.write(updates.doors))
+        "doors" -> setFormat.write(updates.doors),
+        "player" -> updates.player.fold[JsValue](JsNull)(messageObjectFormat.write)
+      )
     }
     def read(value: JsValue) = defaultFormat.read(value)
   }

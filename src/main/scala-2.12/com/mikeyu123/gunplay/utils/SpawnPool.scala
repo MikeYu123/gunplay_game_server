@@ -9,7 +9,7 @@ import scala.util.Random
   */
 object SpawnPool {
 //  TODO make it configurable
-  val defaultPoolSet: Set[Vector2] = Set(
+  val defaultPoolSet: List[Vector2] = List(
     Vector2(-50, 50),
     Vector2(50, -50),
     Vector2(50, 50),
@@ -27,6 +27,6 @@ object SpawnPool {
   val defaultPool = new SpawnPool(defaultPoolSet)
 }
 
-case class SpawnPool(poolSet: Set[Vector2], random: Random = new Random(new SecureRandom())) {
+case class SpawnPool(poolSet: List[Vector2], random: Random = new Random(new SecureRandom())) {
   def randomSpawn: Vector2 = random.shuffle(poolSet).head
 }

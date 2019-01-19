@@ -13,7 +13,7 @@ object LevelParser {
   case class PinData(width: Int, height: Int, x: Double, y: Double, angle: Double = 0d)
   case class WallData(width: Int, height: Int, x: Double, y: Double, angle: Double = 0d)
   case class DoorData(width: Int, height: Int, x: Double, y: Double, pin: PinData, angle: Double = 0d)
-  case class LevelData(doors: Set[DoorData], walls: Set[WallData], spawns: Set[Vector2])
+  case class LevelData(doors: Set[DoorData], walls: Set[WallData], spawns: List[Vector2])
 }
 trait LevelParser extends DefaultJsonProtocol with UuidMarshalling {
   implicit val vector2Format = jsonFormat(Vector2, "x", "y")

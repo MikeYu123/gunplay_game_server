@@ -4,7 +4,9 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Terminated}
 import akka.http.scaladsl.model.ws.TextMessage
-import com.mikeyu123.gunplay.server.messaging.{JsonProtocol, ObjectsMarshaller}
+import com.mikeyu123.gunplay.server.ClientConnectionActor.Register
+import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
+import com.mikeyu123.gunplay.server.messaging.{JsonProtocol, MessageObject, ObjectsMarshaller}
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
 import spray.json._
@@ -14,8 +16,27 @@ import scala.util.Try
 /**
   * Created by mihailurcenkov on 25.07.17.
   */
-case class RegisteredMessage(id: UUID, registered: Boolean = true)
-case class Register(name: Option[String] = None)
+object ClientConnectionActor {
+
+  sealed trait ServerMessage
+  case class Registered(id: UUID) extends ServerMessage
+  case class Updates(
+              bodies: Set[MessageObject],
+              bullets: Set[MessageObject],
+              doors: Set[MessageObject]) extends ServerMessage
+  case class Leaderboard(entries: Seq[LeaderboardEntry] = Seq()) extends ServerMessage
+
+
+  sealed trait ClientMessage
+  case class Register(name: Option[String] = None) extends ClientMessage
+  case class Controls(up: Boolean,
+                      down: Boolean,
+                      left: Boolean,
+                      right: Boolean,
+                      angle: Double,
+                      click: Boolean) extends ClientMessage
+
+}
 class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtocol {
   //TODO possibly move connection to constructor to avoid Option handling
   var connection: Option[ActorRef] = None
@@ -68,7 +89,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
 //      println(s"registered $uuid")
       connection foreach {
         conn =>
-          val messageToSend = RegisteredMessage(uuid).toJson.toString
+          val messageToSend = Registered(uuid).toJson.toString
           conn ! TextMessage.Strict(messageToSend)
       }
 

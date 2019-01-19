@@ -3,7 +3,8 @@ package com.mikeyu123.gunplay
 import java.util.UUID
 
 import akka.actor.ActorRef
-import com.mikeyu123.gunplay.server.WorldActor.LeaderBoardEntry
+import com.mikeyu123.gunplay.server.ClientConnectionActor.Updates
+import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay.utils.Vector2
 import com.mikeyu123.gunplay_physics.structs.Vector
@@ -29,8 +30,5 @@ package object server {
   case class PublishUpdates(updates: Updates)
   case object RegisterClient
 
-  case class Controls(up: Boolean, down: Boolean, left: Boolean, right: Boolean, angle: Double, click: Boolean)
   case object RegisterPlayer
-  case class ClientMessage(`type`: String, message: Option[JsValue])
-  case class Updates(bodies: Set[MessageObject], bullets: Set[MessageObject], doors: Set[MessageObject], leaderBoard: Seq[LeaderBoardEntry] = Seq())
 }

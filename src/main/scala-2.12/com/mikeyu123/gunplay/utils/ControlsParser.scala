@@ -1,6 +1,6 @@
 package com.mikeyu123.gunplay.utils
 
-import com.mikeyu123.gunplay.server.Controls
+import com.mikeyu123.gunplay.server.ClientConnectionActor.Controls
 
 /**
   * Created by mihailurcenkov on 30.07.17.

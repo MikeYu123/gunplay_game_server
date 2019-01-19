@@ -24,7 +24,6 @@ package object server {
   case class AddPlayer(name: String)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
   case class UpdateControls(velocity: Vector2, angle: Double, click: Boolean)
-  case class Registered(uuid: UUID)
   case object EmitBullet
   case object Step
   case class PublishUpdates(updates: Updates)

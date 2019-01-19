@@ -6,7 +6,6 @@ import com.mikeyu123.gunplay.objects._
 import com.mikeyu123.gunplay.objects.huy.Door.Pin
 import com.mikeyu123.gunplay.objects.huy.Scene.{Murder, WorldUpdates}
 import com.mikeyu123.gunplay.server.ClientConnectionActor.Updates
-import com.mikeyu123.gunplay.server.Updates
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData

@@ -2,7 +2,7 @@ package com.mikeyu123.gunplay.server.messaging
 
 import java.util.UUID
 
-import com.mikeyu123.gunplay.server.ClientConnectionActor.{Registered => _, _}
+import com.mikeyu123.gunplay.server.ClientConnectionActor._
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server._
 import spray.json.{DefaultJsonProtocol, JsObject, JsString, JsValue, JsonFormat, deserializationError, _}
@@ -16,7 +16,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
   implicit object RegisteredMessageFormat extends JsonFormat[Registered] {
     val defaultFormat = jsonFormat1(Registered)
 
-    def write(registered: Registered) = JsObject("type" -> JsString("registered"), "id" -> UuidJsonFormat.write(registered.uuid))
+    def write(registered: Registered) = JsObject("type" -> JsString("registered"), "id" -> UuidJsonFormat.write(registered.id))
 
     def read(value: JsValue) = defaultFormat.read(value)
   }
@@ -39,7 +39,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
 
   implicit object LeaderboardFormat extends JsonFormat[Leaderboard] {
     val entrySeqFormat = implicitly[JsonFormat[Seq[LeaderboardEntry]]]
-    val defaultFormat = jsonFormat1(Leaderboard)
+    val defaultFormat = jsonFormat(Leaderboard, "leaderboard")
     def write(leaderboard: Leaderboard) = {
       JsObject("type" -> JsString("leaderboard"),
         "leaderboard" -> entrySeqFormat.write(leaderboard.entries))
@@ -49,7 +49,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
   }
 
   implicit object ServerMessageFormat extends JsonFormat[ServerMessage] {
-    override def read(json: JsValue): ServerMessage = {
+    override def read(json: JsValue): ServerMessage = json match {
       case JsObject(fields) => fields.get("type") match {
         case Some(JsString("registered")) => RegisteredMessageFormat.read(json)
         case Some(JsString("updates")) => UpdatesMessageFormat.read(json)
@@ -59,7 +59,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
       case x => deserializationError(s"Expected valid server message, but got $x")
     }
 
-    override def write(obj: ServerMessage): JsValue = {
+    override def write(obj: ServerMessage): JsValue = obj match {
       case x: Registered => RegisteredMessageFormat.write(x)
       case x: Leaderboard => LeaderboardFormat.write(x)
       case x: Updates => UpdatesMessageFormat.write(x)
@@ -94,7 +94,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
   }
 
   implicit object ClientMessageFormat extends JsonFormat[ClientMessage] {
-    override def read(json: JsValue): ClientMessage = {
+    override def read(json: JsValue): ClientMessage = json match {
       case JsObject(fields) => fields.get("type") match {
         case Some(JsString("controls")) => ControlsFormat.read(json)
         case Some(JsString("register")) => RegisterFormat.read(json)
@@ -103,7 +103,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
       case x => deserializationError(s"Expected valid client message, but got $x")
     }
 
-    override def write(obj: ClientMessage): JsValue = {
+    override def write(obj: ClientMessage): JsValue = obj match {
       case x: Controls => ControlsFormat.write(x)
       case x: Register => RegisterFormat.write(x)
     }

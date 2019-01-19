@@ -6,7 +6,7 @@ import akka.actor.{Actor, ActorRef, Terminated}
 import com.mikeyu123.gunplay.objects._
 import com.mikeyu123.gunplay.objects.huy.Scene.Murder
 import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
-import com.mikeyu123.gunplay.server.ClientConnectionActor.{Leaderboard, Updates}
+import com.mikeyu123.gunplay.server.ClientConnectionActor.{Leaderboard, Registered, Updates}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay.utils.SpawnPool
@@ -57,6 +57,9 @@ class WorldActor(val scene: Scene) extends Actor {
       bodies += (leaderBoardEntry.id -> player.getId)
       context.watch(s)
       s ! Registered(leaderBoardEntry.id)
+      val leaderboardData = leaderboard.values.toSeq.sortBy(-_.kills)
+      val leaderboardObject = Leaderboard(leaderboardData)
+      s ! leaderboardObject
     case UpdateControls(velocity, angle, click) =>
 //      TODO: handle shit when no uuid
       val s = sender()
@@ -90,7 +93,7 @@ class WorldActor(val scene: Scene) extends Actor {
       )
       val pimpedUpdates: Updates = updates.copy(bodies = pimpedBodies)
 
-      val publishLeaderboard = leaderboardData.nonEmpty
+      val publishLeaderboard = murders.nonEmpty
       val leaderboardObject = Leaderboard(leaderboardData)
       clients.keys.foreach { c =>
         c ! pimpedUpdates

@@ -6,7 +6,9 @@ import akka.actor.{Actor, ActorRef, Terminated}
 import com.mikeyu123.gunplay.objects._
 import com.mikeyu123.gunplay.objects.huy.Scene.Murder
 import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
+import com.mikeyu123.gunplay.server.ClientConnectionActor.{Leaderboard, Updates}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
+import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay.utils.SpawnPool
 import com.mikeyu123.gunplay_physics.structs.Point
 import org.dyn4j.geometry.Vector2
@@ -25,7 +27,7 @@ class WorldActor(val scene: Scene) extends Actor {
 //  TODO: maybe mutable map?
   var clients: Map[ActorRef, UUID] = Map[ActorRef, UUID]()
   var bodies: Map[UUID, UUID] = Map()
-  var leaderBoard: Map[UUID, LeaderboardEntry] = Map()
+  var leaderboard: Map[UUID, LeaderboardEntry] = Map()
 
   def processMurders(murders: Set[Murder]) = {
     murders.foreach(murder => {
@@ -33,13 +35,13 @@ class WorldActor(val scene: Scene) extends Actor {
       val victimId = bodies.find(_._2.equals(murder.victim)).map(_._1)
       for {
         id <- killerId
-        entry <- leaderBoard.get(id)
-      } leaderBoard += (id -> entry.copy(kills = entry.kills + 1))
+        entry <- leaderboard.get(id)
+      } leaderboard += (id -> entry.copy(kills = entry.kills + 1))
       for {
         id <- victimId
-        entry <- leaderBoard.get(id)
+        entry <- leaderboard.get(id)
       } {
-        leaderBoard += (id -> entry.copy(deaths = entry.deaths + 1))
+        leaderboard += (id -> entry.copy(deaths = entry.deaths + 1))
         bodies -= id
       }
     })
@@ -51,7 +53,7 @@ class WorldActor(val scene: Scene) extends Actor {
       val player = scene.addPlayer
       val leaderBoardEntry = LeaderboardEntry(name = name)
       clients += (s -> leaderBoardEntry.id)
-      leaderBoard += (leaderBoardEntry.id -> leaderBoardEntry)
+      leaderboard += (leaderBoardEntry.id -> leaderBoardEntry)
       bodies += (leaderBoardEntry.id -> player.getId)
       context.watch(s)
       s ! Registered(leaderBoardEntry.id)
@@ -74,20 +76,32 @@ class WorldActor(val scene: Scene) extends Actor {
     case Step =>
       val murders = scene.step
       processMurders(murders)
-      val updates = scene.updates.marshall
+      val updates: Updates = scene.updates.marshall
 //      TODO this is huevo, ideas:
 //      1) inverted bodies collection
 //      2) some extra serialization logix
-      val leaderBoardData = leaderBoard.values.toSeq.sortBy(-_.kills)
-      val pimpedUpdates: Updates = updates.copy(leaderBoard = leaderBoardData, bodies = updates.bodies.map(body => {
-        bodies.find(_._2 equals body.uuid).fold(body)((x: (UUID, UUID)) => body.copy(uuid = x._1))
-      }))
-      clients.foreach { _._1 ! PublishUpdates(pimpedUpdates) }
+      val leaderboardData = leaderboard.values.toSeq.sortBy(-_.kills)
+//      reset uuids
+      val pimpedBodies = updates.bodies.map(
+        body => {
+          val bodyOption: Option[(UUID, UUID)] = bodies.find(_._2 equals body.uuid)
+          bodyOption.fold(body)((x: (UUID, UUID)) => body.copy(uuid = x._1))
+        }
+      )
+      val pimpedUpdates: Updates = updates.copy(bodies = pimpedBodies)
+
+      val publishLeaderboard = leaderboardData.nonEmpty
+      val leaderboardObject = Leaderboard(leaderboardData)
+      clients.keys.foreach { c =>
+        c ! pimpedUpdates
+        if (publishLeaderboard)
+          c ! leaderboardObject
+      }
     case Terminated(client) =>
 //      println(s"terminated ${clients(client)}")
 //      TODO: remove body from world
       val clientOption = clients.get(client)
-      clientOption.foreach(leaderBoard -= _)
+      clientOption.foreach(leaderboard -= _)
       val bodyOption = clientOption.flatMap(bodies.get)
       bodyOption foreach { body =>
         bodies -= body

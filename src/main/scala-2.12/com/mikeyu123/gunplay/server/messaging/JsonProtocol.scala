@@ -85,10 +85,10 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
   implicit object RegisterFormat extends JsonFormat[Register] {
     val defaultFormat = jsonFormat1(Register)
     def read(json: JsValue): Register = defaultFormat.read(json)
-    def write(controls: Register) = {
+    def write(register: Register) = {
       JsObject(
         "type" -> JsString("register"),
-        "name" -> JsString("name")
+        "name" -> register.name.fold[JsValue](JsNull)(JsString(_))
       )
     }
   }

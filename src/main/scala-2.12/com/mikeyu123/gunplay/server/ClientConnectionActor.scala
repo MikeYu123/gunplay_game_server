@@ -78,11 +78,28 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
           worldActor ! messageToSend
       }
 
+    case BinaryMessage.Strict(t) =>
+      val buffer = t.asByteBuffer
+      val message: ClientMessage = buffer.convertTo[ClientMessage]
+      message match {
+        case controls: Controls =>
+          //            TODO this fails if message is broken
+          val (velocity: Vector2, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
+          val messageToSend: UpdateControls = UpdateControls(velocity, angle, click)
+          worldActor ! messageToSend
+        case Register(name) =>
+          //          TODO REWORK THIS WHOLE
+          val messageToSend = AddPlayer(name.getOrElse("huy"))
+          worldActor ! messageToSend
+      }
+
     case message: ServerMessage =>
       connection foreach { conn =>
         val messageToSend = message.toJson.toString()
-        conn ! BinaryMessage.Strict(message.toBinary)
-        conn ! TextMessage.Strict(messageToSend)
+//        println(message)
+//        TODO split logic onto binary/text
+        conn ! BinaryMessage.Strict(ByteString(message.toBinary.array))
+//        conn ! TextMessage.Strict(messageToSend)
       }
 
     case _ => // ingore

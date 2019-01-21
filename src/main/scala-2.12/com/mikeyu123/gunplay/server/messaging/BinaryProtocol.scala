@@ -130,13 +130,7 @@ trait BinaryProtocol {
       val bufferSize: Int = 5 + entriesSize
       val result = encodedEntries.foldLeft(ByteBuffer.allocate(bufferSize)
         .put(3.toByte)
-        .putInt(entriesCount)) {(acc, v) =>
-        println(acc.array.length)
-        println(v.array.length)
-        acc.put(v)
-      }
-//        _.put(_)
-//      )
+        .putInt(entriesCount))(_.put(_))
       result.flip
       result
     }
@@ -237,7 +231,9 @@ trait BinaryProtocol {
     }
 
     def decode(byteBuffer: ByteBuffer): ClientMessage = {
-      byteBuffer.array.head match {
+      val typeByte = byteBuffer.get()
+      byteBuffer.position(0)
+      typeByte match {
         case 2 => ControlsBinaryFormat.decode(byteBuffer)
         case 1 => RegisterBinaryFormat.decode(byteBuffer)
       }

@@ -33,5 +33,5 @@ class Player(width: Double = defaultWidth,
   setLinearVelocity(velocity)
   translate(position)
   setAngularVelocity(0.0)
-  setMass(MassType.NORMAL)
+  setMass(MassType.FIXED_ANGULAR_VELOCITY)
 }

@@ -8,7 +8,7 @@ import akka.actor.{Actor, ActorRef, Terminated}
 import akka.http.scaladsl.model.ws.BinaryMessage
 import akka.http.scaladsl.model.ws.TextMessage
 import akka.util.ByteString
-import com.mikeyu123.gunplay.server.ClientConnectionActor.{ClientMessage, Controls, Register, ServerMessage}
+import com.mikeyu123.gunplay.server.ClientConnectionActor._
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.{BinaryProtocol, JsonProtocol, MessageObject, ObjectsMarshaller}
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
@@ -41,10 +41,16 @@ object ClientConnectionActor {
                       angle: Double,
                       click: Boolean) extends ClientMessage
 
+  sealed trait ConnectionType
+  case object BinaryConnection extends ConnectionType
+  case object JsonConnection extends ConnectionType
+
 }
 class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProtocol with JsonProtocol {
   //TODO possibly move connection to constructor to avoid Option handling
   var connection: Option[ActorRef] = None
+
+  var connectionType: Option[ConnectionType] = None
 
   val receive: Receive = {
 //    Connection initialized
@@ -74,6 +80,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
             worldActor ! messageToSend
         case Register(name) =>
 //          TODO REWORK THIS WHOLE
+          connectionType = Some(JsonConnection)
           val messageToSend = AddPlayer(name.getOrElse("huy"))
           worldActor ! messageToSend
       }
@@ -89,6 +96,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
           worldActor ! messageToSend
         case Register(name) =>
           //          TODO REWORK THIS WHOLE
+          connectionType = Some(BinaryConnection)
           val messageToSend = AddPlayer(name.getOrElse("huy"))
           worldActor ! messageToSend
       }
@@ -98,8 +106,12 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
         val messageToSend = message.toJson.toString()
 //        println(message)
 //        TODO split logic onto binary/text
-        conn ! BinaryMessage.Strict(ByteString(message.toBinary.array))
-//        conn ! TextMessage.Strict(messageToSend)
+        connectionType match {
+          case Some(BinaryConnection) =>
+            conn ! BinaryMessage.Strict (ByteString (message.toBinary.array) )
+          case Some(JsonConnection) =>
+            conn ! TextMessage.Strict(messageToSend)
+        }
       }
 
     case _ => // ingore

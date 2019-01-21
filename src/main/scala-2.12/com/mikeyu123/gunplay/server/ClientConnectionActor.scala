@@ -5,10 +5,12 @@ import java.util.UUID
 import java.util.zip.GZIPOutputStream
 
 import akka.actor.{Actor, ActorRef, Terminated}
+import akka.http.scaladsl.model.ws.BinaryMessage
 import akka.http.scaladsl.model.ws.TextMessage
+import akka.util.ByteString
 import com.mikeyu123.gunplay.server.ClientConnectionActor.{ClientMessage, Controls, Register, ServerMessage}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
-import com.mikeyu123.gunplay.server.messaging.{JsonProtocol, MessageObject, ObjectsMarshaller}
+import com.mikeyu123.gunplay.server.messaging.{BinaryProtocol, JsonProtocol, MessageObject, ObjectsMarshaller}
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
 import spray.json._
@@ -40,7 +42,7 @@ object ClientConnectionActor {
                       click: Boolean) extends ClientMessage
 
 }
-class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtocol {
+class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProtocol with JsonProtocol {
   //TODO possibly move connection to constructor to avoid Option handling
   var connection: Option[ActorRef] = None
 
@@ -79,6 +81,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with JsonProtoco
     case message: ServerMessage =>
       connection foreach { conn =>
         val messageToSend = message.toJson.toString()
+        conn ! BinaryMessage.Strict(message.toBinary)
         conn ! TextMessage.Strict(messageToSend)
       }
 

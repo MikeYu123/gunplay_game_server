@@ -8,9 +8,8 @@ import akka.util.ByteString
 import com.mikeyu123.gunplay.server.ClientConnectionActor._
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 
-//TODO rewrite this to byte arrays
-//TODO introduce implicit class
-object BinaryProtocol {
+//TODO rewrite this to bytestring
+trait BinaryProtocol {
   trait BinaryFormat[T] {
     def encode(t: T): ByteBuffer
     def decode(buffer: ByteBuffer) : T
@@ -22,7 +21,7 @@ object BinaryProtocol {
     def convertTo[T](implicit ev: BinaryFormat[T]) : T = ev.decode(byteBuffer)
   }
 
-  implicit object RegisteredFormat extends BinaryFormat[Registered] {
+  implicit object RegisteredBinaryFormat extends BinaryFormat[Registered] {
     def encode(registered: Registered): ByteBuffer = {
       val id = registered.id
       val result = ByteBuffer.allocate(17).put(1.toByte).putLong(id.getMostSignificantBits).putLong(id.getLeastSignificantBits)
@@ -35,7 +34,7 @@ object BinaryProtocol {
     }
   }
 
-  implicit object MessageObjectFormat extends BinaryFormat[MessageObject] {
+  implicit object MessageObjectBinaryFormat extends BinaryFormat[MessageObject] {
     def encode(messageObject: MessageObject): ByteBuffer = {
       val result = ByteBuffer.allocate(5 * 8)
         .putDouble(messageObject.x)
@@ -52,13 +51,13 @@ object BinaryProtocol {
     }
   }
 
-  implicit object UpdatesFormat extends BinaryFormat[Updates] {
+  implicit object UpdatesBinaryFormat extends BinaryFormat[Updates] {
     def encode(updates: Updates): ByteBuffer = {
       val bodiesSize = updates.bodies.size
       val bulletsSize = updates.bullets.size
       val doorsSize = updates.doors.size
       val playerSize = updates.player.size
-      val encode: MessageObject => ByteBuffer = MessageObjectFormat.encode
+      val encode: MessageObject => ByteBuffer = MessageObjectBinaryFormat.encode
 
       val bodyMessages: ByteBuffer = updates.bodies.map(encode).foldLeft(ByteBuffer.allocate(bodiesSize * 40))(_.put(_))
       bodyMessages.flip()
@@ -82,7 +81,7 @@ object BinaryProtocol {
     }
 
     def decode(byteBuffer: ByteBuffer): Updates = {
-      val decode: ByteBuffer => MessageObject = MessageObjectFormat.decode
+      val decode: ByteBuffer => MessageObject = MessageObjectBinaryFormat.decode
       byteBuffer.get
       val bodiesSize = byteBuffer.getInt
       val bodies = (1 to bodiesSize).map((_) => decode(byteBuffer)).toSet
@@ -96,7 +95,7 @@ object BinaryProtocol {
     }
   }
 
-  implicit object LeaderboardEntryFormat extends BinaryFormat[LeaderboardEntry] {
+  implicit object LeaderboardEntryBinaryFormat extends BinaryFormat[LeaderboardEntry] {
     def encode(leaderboardEntry: LeaderboardEntry): ByteBuffer = {
       val nameBytes = leaderboardEntry.name.getBytes("UTF-8")
       val size = 28 + nameBytes.length
@@ -121,23 +120,29 @@ object BinaryProtocol {
   }
 
 
-  implicit object LeaderboardFormat extends BinaryFormat[Leaderboard] {
+  implicit object LeaderboardBinaryFormat extends BinaryFormat[Leaderboard] {
     def encode(leaderboard: Leaderboard): ByteBuffer = {
-      val encode: LeaderboardEntry => ByteBuffer = LeaderboardEntryFormat.encode
+      val encode: LeaderboardEntry => ByteBuffer = LeaderboardEntryBinaryFormat.encode
       val entries = leaderboard.entries
       val entriesCount = entries.size
       val encodedEntries: Seq[ByteBuffer] = entries.map(encode)
-      val entriesSize = encodedEntries.map(_.position).sum
+      val entriesSize = encodedEntries.map(_.limit).sum
       val bufferSize: Int = 5 + entriesSize
       val result = encodedEntries.foldLeft(ByteBuffer.allocate(bufferSize)
         .put(3.toByte)
-        .putInt(entriesCount))(_.put(_))
+        .putInt(entriesCount)) {(acc, v) =>
+        println(acc.array.length)
+        println(v.array.length)
+        acc.put(v)
+      }
+//        _.put(_)
+//      )
       result.flip
       result
     }
 
     def decode(byteBuffer: ByteBuffer) = {
-      val decode: ByteBuffer => LeaderboardEntry = LeaderboardEntryFormat.decode
+      val decode: ByteBuffer => LeaderboardEntry = LeaderboardEntryBinaryFormat.decode
       byteBuffer.get
       val count = byteBuffer.getInt
       val entries = (1 to count).map((_) => decode(byteBuffer))
@@ -145,13 +150,13 @@ object BinaryProtocol {
     }
   }
 
-  implicit object ServerMessageFormat extends BinaryFormat[ServerMessage] {
+  implicit object ServerMessageBinaryFormat extends BinaryFormat[ServerMessage] {
 
     def encode(serverMessage: ServerMessage): ByteBuffer = {
       val result = serverMessage match {
-        case x: Updates => UpdatesFormat.encode(x)
-        case x: Leaderboard => LeaderboardFormat.encode(x)
-        case x: Registered => RegisteredFormat.encode(x)
+        case x: Updates => UpdatesBinaryFormat.encode(x)
+        case x: Leaderboard => LeaderboardBinaryFormat.encode(x)
+        case x: Registered => RegisteredBinaryFormat.encode(x)
       }
       result.flip()
       result
@@ -159,14 +164,14 @@ object BinaryProtocol {
 
     def decode(byteBuffer: ByteBuffer): ServerMessage = {
       byteBuffer.array.head match {
-        case 1 => RegisteredFormat.decode(byteBuffer)
-        case 2 => UpdatesFormat.decode(byteBuffer)
-        case 3 => LeaderboardFormat.decode(byteBuffer)
+        case 1 => RegisteredBinaryFormat.decode(byteBuffer)
+        case 2 => UpdatesBinaryFormat.decode(byteBuffer)
+        case 3 => LeaderboardBinaryFormat.decode(byteBuffer)
       }
     }
   }
 
-  implicit object RegisterFormat extends BinaryFormat[Register] {
+  implicit object RegisterBinaryFormat extends BinaryFormat[Register] {
     def encode(register: Register) = {
       val nameBytes: Array[Byte] = register.name.fold(Array[Byte]())(_.getBytes("UTF-8"))
       val nameLength = nameBytes.length
@@ -191,7 +196,7 @@ object BinaryProtocol {
     }
   }
 
-  implicit object ControlsFormat extends BinaryFormat[Controls] {
+  implicit object ControlsBinaryFormat extends BinaryFormat[Controls] {
     def encode(controls: Controls): ByteBuffer = {
       val controlsByte =
         ((if (controls.up) 1 else 0) +
@@ -220,12 +225,12 @@ object BinaryProtocol {
     }
   }
 
-  implicit object ClientMessageFormat extends BinaryFormat[ClientMessage] {
+  implicit object ClientMessageBinaryFormat extends BinaryFormat[ClientMessage] {
 
     def encode(clientMessage: ClientMessage): ByteBuffer = {
       val result = clientMessage match {
-        case x: Controls => ControlsFormat.encode(x)
-        case x: Register => RegisterFormat.encode(x)
+        case x: Controls => ControlsBinaryFormat.encode(x)
+        case x: Register => RegisterBinaryFormat.encode(x)
       }
       result.flip()
       result
@@ -233,8 +238,8 @@ object BinaryProtocol {
 
     def decode(byteBuffer: ByteBuffer): ClientMessage = {
       byteBuffer.array.head match {
-        case 2 => ControlsFormat.decode(byteBuffer)
-        case 1 => RegisterFormat.decode(byteBuffer)
+        case 2 => ControlsBinaryFormat.decode(byteBuffer)
+        case 1 => RegisterBinaryFormat.decode(byteBuffer)
       }
     }
   }

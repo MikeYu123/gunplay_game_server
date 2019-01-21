@@ -1,6 +1,8 @@
 package com.mikeyu123.gunplay.server
 
+import java.io.ByteArrayOutputStream
 import java.util.UUID
+import java.util.zip.GZIPOutputStream
 
 import akka.actor.{Actor, ActorRef, Terminated}
 import akka.http.scaladsl.model.ws.TextMessage

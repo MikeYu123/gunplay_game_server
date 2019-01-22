@@ -14,4 +14,4 @@ WORKDIR /data
 COPY bin /data
 
 # Define default command.
-CMD ["java", "-jar", "gunplay_from_scratch-assembly-1.0.jar"]
+CMD ["java", "-jar", "-server", "gunplay_from_scratch-assembly-1.0.jar"]

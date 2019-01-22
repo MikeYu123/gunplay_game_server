@@ -13,37 +13,39 @@ object Shotgun {
   val bulletOffset = utils.AppConfig.getInt("bullet.offset")
   val span: Long = utils.AppConfig.getLong("shotgun.span")
   val ammo = utils.AppConfig.getDouble("shotgun.ammo")
-  def apply(span: Long = span, ammo: Double = ammo) = new Shotgun(span, ammo)
+  val bulletVelocity = utils.AppConfig.getDouble("shotgun.velocity")
+  def apply(span: Long = span, bulletVelocity: Double = bulletVelocity, ammo: Double = ammo) = new Shotgun(span, bulletVelocity, ammo)
 }
-class Shotgun(span: Long = Shotgun.span, var ammo: Double = Shotgun.ammo) extends Weapon {
+
+class Shotgun(span: Long = Shotgun.span, bulletVelocity: Double = Shotgun.bulletVelocity, var ammo: Double = Shotgun.ammo) extends Weapon {
   var lastFired = Instant.now
 
   def emit(player: Player): Set[Bullet] = {
     if(lastFired.plus(span, ChronoUnit.MILLIS).isBefore(Instant.now) && ammo > 0) {
       val bullet1 = new Bullet(player.getId, position =
         player.getWorldCenter.add(
-          Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation)),
-        velocity = Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation)
+          Vector2(Shotgun.bulletOffset, 0).rotate(player.getTransform.getRotation)),
+        velocity = Vector2(bulletVelocity, 0).rotate(player.getTransform.getRotation)
       )
       val bullet2 = new Bullet(player.getId, position =
         player.getWorldCenter.add(
-          Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation)),
-        velocity = Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation - Math.PI / 6)
+          Vector2(Shotgun.bulletOffset, 0).rotate(player.getTransform.getRotation)),
+        velocity = Vector2(bulletVelocity, 0).rotate(player.getTransform.getRotation - Math.PI / 6)
       )
       val bullet3 = new Bullet(player.getId, position =
         player.getWorldCenter.add(
-          Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation)),
-        velocity = Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation + Math.PI / 6)
+          Vector2(Shotgun.bulletOffset, 0).rotate(player.getTransform.getRotation)),
+        velocity = Vector2(bulletVelocity, 0).rotate(player.getTransform.getRotation + Math.PI / 6)
       )
       val bullet4 = new Bullet(player.getId, position =
         player.getWorldCenter.add(
-          Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation)),
-        velocity = Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation - Math.PI / 12)
+          Vector2(Shotgun.bulletOffset, 0).rotate(player.getTransform.getRotation)),
+        velocity = Vector2(bulletVelocity, 0).rotate(player.getTransform.getRotation - Math.PI / 12)
       )
       val bullet5 = new Bullet(player.getId, position =
         player.getWorldCenter.add(
-          Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation)),
-        velocity = Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation + Math.PI / 12)
+          Vector2(Shotgun.bulletOffset, 0).rotate(player.getTransform.getRotation)),
+        velocity = Vector2(bulletVelocity, 0).rotate(player.getTransform.getRotation + Math.PI / 12)
       )
       bullet1.getTransform.setRotation(player.getTransform.getRotation)
       bullet1.setAsleep(false)

@@ -19,6 +19,7 @@ import org.dyn4j.dynamics._
 import org.dyn4j.dynamics.contact._
 
 import scala.collection.mutable
+import scala.util.Random
 
 object Scene {
   val stepNumber = utils.AppConfig.getInt("world.stepNumber")
@@ -122,7 +123,7 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = 
 
   def addPlayer: Player = {
     val player = Player(position = spawnPool.randomSpawn)
-    player.weapon = Some(Shotgun())
+    player.weapon = Random.shuffle(Shotgun() :: Pistol() :: Riffle() :: Nil).headOption
     world.addBody(player)
     player
   }

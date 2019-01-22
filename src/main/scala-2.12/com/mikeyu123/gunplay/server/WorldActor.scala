@@ -10,6 +10,7 @@ import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
 import com.mikeyu123.gunplay.server.ClientConnectionActor.{Leaderboard, Registered, Updates}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.SpawnPool
 import com.mikeyu123.gunplay_physics.structs.Point
 import org.dyn4j.dynamics.Body
@@ -20,7 +21,8 @@ import org.dyn4j.geometry.Vector2
   */
 
 object WorldActor {
-  case class LeaderboardEntry(id: UUID = UUID.randomUUID, name: String = "", kills: Int = 0, deaths: Int = 0)
+  val defaultName = utils.AppConfig.getString("leaderboard.defaultName")
+  case class LeaderboardEntry(id: UUID = UUID.randomUUID, name: String = defaultName, kills: Int = 0, deaths: Int = 0)
 }
 
 class WorldActor(val scene: Scene) extends Actor {

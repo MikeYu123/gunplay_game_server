@@ -11,6 +11,7 @@ import akka.http.scaladsl.model.ws.Message
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
 import com.mikeyu123.gunplay.objects.huy.Scene
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.LevelParser
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
@@ -23,6 +24,11 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 
 
 object WebServer extends App with LevelParser with SprayJsonSupport {
+  val interface = utils.AppConfig.getString("server.interface")
+  val port = utils.AppConfig.getInt("server.port")
+  val clientMessagePoolSize = utils.AppConfig.getInt("server.clientMessagePoolSize")
+  val stepTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.stepTimeout").getNano)
+  val initialStep = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.initialStep").getNano)
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   val levels = ConfigFactory.load("levels").as[List[LevelData]]("levels")
@@ -35,7 +41,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val c = client
     val in = Sink.actorRef(c, ConnectionClose)
 
-    val out = Source.actorRef(2000000, OverflowStrategy.fail).mapMaterializedValue { a =>
+    val out = Source.actorRef(clientMessagePoolSize, OverflowStrategy.fail).mapMaterializedValue { a =>
       c ! RegisterConnection(a)
       a
     }
@@ -44,9 +50,6 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
   }
 
     import akka.http.scaladsl.Http
-//    val interface = "localhost"
-    val interface = "0.0.0.0"
-    val port = 8090
     import akka.http.scaladsl.server.Directives._
 
     val route = get {
@@ -67,8 +70,8 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
 
     val cancellable =
       system.scheduler.schedule(
-        0 milliseconds,
-        50 milliseconds,
+        initialStep,
+        stepTimeout,
         worldActor,
         Step)
   }

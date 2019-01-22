@@ -5,11 +5,12 @@ import java.util.UUID
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.{Geometry, MassType}
 import Wall.{defaultHeight, defaultWidth}
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.Vector2
 
 object Wall {
-  val defaultWidth: Double = 100d
-  val defaultHeight: Double = 20d
+  val defaultWidth: Double = utils.AppConfig.getInt("wall.width")
+  val defaultHeight: Double = utils.AppConfig.getInt("wall.width")
 }
 class Wall(width: Double = defaultWidth,
            height: Double = defaultHeight,

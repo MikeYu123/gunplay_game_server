@@ -4,14 +4,15 @@ import java.util.UUID
 
 import org.dyn4j.geometry.{Geometry, MassType}
 import Door.{Pin, defaultHeight, defaultWidth}
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.LevelParser.PinData
 import com.mikeyu123.gunplay.utils.Vector2
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.joint.RevoluteJoint
 
 object Door {
-  val defaultHeight = 50d
-  val defaultWidth = 50d
+  val defaultHeight = utils.AppConfig.getInt("door.height")
+  val defaultWidth = utils.AppConfig.getInt("door.width")
   case class Pin(x: Double, y: Double, width: Int, height: Int) extends Body() {
     addFixture(Geometry.createRectangle(width, height))
     setLinearVelocity(0,0)

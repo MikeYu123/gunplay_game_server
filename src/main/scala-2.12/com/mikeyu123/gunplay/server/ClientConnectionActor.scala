@@ -11,6 +11,7 @@ import akka.util.ByteString
 import com.mikeyu123.gunplay.server.ClientConnectionActor._
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.{BinaryProtocol, JsonProtocol, MessageObject, ObjectsMarshaller}
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
 import spray.json._
@@ -21,6 +22,7 @@ import scala.util.Try
   * Created by mihailurcenkov on 25.07.17.
   */
 object ClientConnectionActor {
+  val defaultName = utils.AppConfig.getString("leaderboard.defaultName")
 
   sealed trait ServerMessage
   case class Registered(id: UUID) extends ServerMessage
@@ -81,7 +83,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
         case Register(name) =>
 //          TODO REWORK THIS WHOLE
           connectionType = Some(JsonConnection)
-          val messageToSend = AddPlayer(name.getOrElse("huy"))
+          val messageToSend = AddPlayer(name.getOrElse(ClientConnectionActor.defaultName))
           worldActor ! messageToSend
       }
 
@@ -97,7 +99,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
         case Register(name) =>
           //          TODO REWORK THIS WHOLE
           connectionType = Some(BinaryConnection)
-          val messageToSend = AddPlayer(name.getOrElse("huy"))
+          val messageToSend = AddPlayer(name.getOrElse(ClientConnectionActor.defaultName))
           worldActor ! messageToSend
       }
 

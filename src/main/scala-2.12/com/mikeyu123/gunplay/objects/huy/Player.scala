@@ -5,14 +5,15 @@ import java.util.UUID
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.{Geometry, MassType}
 import Player.{defaultHeight, defaultWidth}
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.Vector2
 
 /**
   * Created by mihailurcenkov on 13.07.17.
   */
 object Player {
-  val defaultWidth: Double = 10d
-  val defaultHeight: Double = 10d
+  val defaultWidth: Double = utils.AppConfig.getInt("player.width")
+  val defaultHeight: Double = utils.AppConfig.getInt("player.height")
 
   def apply(width: Double = defaultWidth,
             height: Double = defaultHeight,

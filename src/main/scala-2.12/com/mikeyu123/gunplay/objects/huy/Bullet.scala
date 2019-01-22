@@ -5,13 +5,14 @@ import java.util.UUID
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Geometry
 import Bullet.{defaultHeight, defaultWidth}
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.Vector2
 import org.dyn4j.geometry
 import geometry.MassType
 
 object Bullet {
-  val defaultWidth = 5
-  val defaultHeight = 1
+  val defaultWidth = utils.AppConfig.getInt("bullet.width")
+  val defaultHeight = utils.AppConfig.getInt("bullet.height")
 }
 class Bullet(val emitent: UUID,
              width: Double = defaultWidth,

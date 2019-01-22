@@ -8,6 +8,7 @@ import com.mikeyu123.gunplay.objects.huy.Scene.{Murder, WorldUpdates}
 import com.mikeyu123.gunplay.server.ClientConnectionActor.Updates
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
+import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
 import com.mikeyu123.gunplay.utils.{SpawnPool, Vector2}
 import org.dyn4j.collision.manifold.Manifold
@@ -20,6 +21,7 @@ import org.dyn4j.dynamics.contact._
 import scala.collection.mutable
 
 object Scene {
+  val stepNumber = utils.AppConfig.getInt("world.stepNumber")
   case class Murder(killer: UUID, victim: UUID)
   case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Body] = Set(), doors: Set[Body] = Set())
   def fromLevel(level: LevelData): Scene = {
@@ -40,7 +42,7 @@ object Scene {
   }
 }
 
-class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool) {
+class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = Scene.stepNumber) {
   val world = new World()
   world.setGravity(Vector2(0,0))
   var bodiesToRemove = collection.mutable.Set[Body]()
@@ -151,7 +153,7 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool) {
   }
 
   def step: Set[Murder] = {
-    world.step(150)
+    world.step(stepNumber)
     bodiesToRemove.foreach(world.removeBody)
     bodiesToRemove.clear
     val returnSet: Set[Scene.Murder] = murders.toSet

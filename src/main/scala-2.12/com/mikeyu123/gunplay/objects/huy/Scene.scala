@@ -122,7 +122,7 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = 
 
   def addPlayer: Player = {
     val player = Player(position = spawnPool.randomSpawn)
-    player.weapon = Some(Pistol())
+    player.weapon = Some(Shotgun())
     world.addBody(player)
     player
   }

@@ -13,13 +13,13 @@ object Pistol {
   val bulletOffset = utils.AppConfig.getInt("bullet.offset")
   val span: Long = utils.AppConfig.getLong("pistol.span")
   val ammo = utils.AppConfig.getDouble("pistol.ammo")
-  def apply(span: Long = span, ammo: Double = Double.PositiveInfinity) = new Pistol(span, ammo)
+  def apply(span: Long = span, ammo: Double = ammo) = new Pistol(span, ammo)
 }
 class Pistol(span: Long = Pistol.span, var ammo: Double = Pistol.ammo) extends Weapon {
   var lastFired = Instant.now
 
   def emit(player: Player): Set[Bullet] = {
-    if(lastFired.plus(span, ChronoUnit.MILLIS).isBefore(Instant.now)) {
+    if(lastFired.plus(span, ChronoUnit.MILLIS).isBefore(Instant.now) && ammo > 0) {
       val bullet = new Bullet(player.getId, position =
         player.getWorldCenter.add(
           Vector2(Pistol.bulletOffset, 0).rotate(player.getTransform.getRotation)),
@@ -28,6 +28,7 @@ class Pistol(span: Long = Pistol.span, var ammo: Double = Pistol.ammo) extends W
       bullet.getTransform.setRotation(player.getTransform.getRotation)
       bullet.setAsleep(false)
       lastFired = Instant.now
+      ammo -= 1
       Set(bullet)
     }
     else {

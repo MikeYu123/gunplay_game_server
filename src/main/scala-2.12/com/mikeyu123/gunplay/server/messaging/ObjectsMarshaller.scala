@@ -1,7 +1,7 @@
 package com.mikeyu123.gunplay.server.messaging
 
-import com.mikeyu123.gunplay.objects.Player
-import com.mikeyu123.gunplay.objects.huy.{Player, Riffle, Shotgun}
+import com.mikeyu123.gunplay.objects.{Drop, Player}
+import com.mikeyu123.gunplay.weapons.{Pistol, Riffle, Shotgun}
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.{Geometry, Rectangle}
@@ -30,6 +30,17 @@ object ObjectsMarshaller {
         case None => ("unarmed", 0d)
       }
       PlayerObject(transform.getTranslationX, transform.getTranslationY, transform.getRotation, shape.getWidth, shape.getHeight, weapon, ammo)
+    }
+  }
+  implicit class MarchallableDrop(drop: Drop) {
+    def toDropObject = {
+      val transform = drop.getTransform
+      val weapon = drop.weapon match {
+        case _: Pistol => "pistol"
+        case _: Shotgun => "shotgun"
+        case _: Riffle => "riffle"
+      }
+      DropObject(transform.getTranslationX, transform.getTranslationY, weapon)
     }
   }
 }

@@ -30,6 +30,7 @@ object ClientConnectionActor {
               bodies: Set[PlayerObject],
               bullets: Set[MessageObject],
               doors: Set[MessageObject],
+              drops: Set[DropObject],
               player: Option[PlayerObject] = None) extends ServerMessage
   case class Leaderboard(entries: Seq[LeaderboardEntry] = Seq()) extends ServerMessage
 

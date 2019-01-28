@@ -26,6 +26,7 @@ package object server {
   case class UpdateControls(velocity: Vector2, angle: Double, click: Boolean)
   case object EmitBullet
   case object Step
+  case object SpawnDrop
   case object RegisterClient
 
   case object RegisterPlayer

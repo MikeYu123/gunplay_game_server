@@ -83,6 +83,7 @@ class WorldActor(val scene: Scene) extends Actor {
             bodies += (client -> player.getId)
           }
       }
+
     case Step =>
       val murders = scene.step
       processMurders(murders)
@@ -110,6 +111,9 @@ class WorldActor(val scene: Scene) extends Actor {
         if (publishLeaderboard)
           client ! leaderboardObject
       }
+
+    case SpawnDrop =>
+      scene.placeDrop
 
     case Terminated(client) =>
 //      println(s"terminated ${clients(client)}")

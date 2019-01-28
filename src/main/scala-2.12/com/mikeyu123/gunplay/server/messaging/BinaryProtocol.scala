@@ -140,7 +140,7 @@ trait BinaryProtocol {
       bulletMessages.flip()
       val doorMessages: ByteBuffer = updates.doors.map(encode).foldLeft(ByteBuffer.allocate(doorsSize * 40))(_.put(_))
       doorMessages.flip()
-      val dropMessages: ByteBuffer = updates.drops.map(dropEncode).foldLeft(ByteBuffer.allocate(doorsSize * 17))(_.put(_))
+      val dropMessages: ByteBuffer = updates.drops.map(dropEncode).foldLeft(ByteBuffer.allocate(dropsSize * 17))(_.put(_))
       dropMessages.flip()
       val playerMessage: ByteBuffer = updates.player.map(playerEncode).getOrElse(ByteBuffer.allocate(0))
       val result = ByteBuffer.allocate(21 + bodiesSize * 49 + dropsSize * 17 + bulletsSize * 40 + doorsSize * 40 + playerSize * 49)

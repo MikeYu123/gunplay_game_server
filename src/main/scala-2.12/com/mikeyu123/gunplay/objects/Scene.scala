@@ -33,7 +33,7 @@ object Scene {
     val doors = level.doors.map { doorData =>
       new Door(doorData.width, doorData.height, Vector2(doorData.x, doorData.y), Vector2(0,0), Door.pin(doorData.pin))
     }
-    val scene = new Scene(SpawnPool(level.spawns))
+    val scene = new Scene(SpawnPool(level.spawns), SpawnPool(level.dropSpawns), stepNumber)
     walls.foreach(wall => scene.world.addBody(wall))
     doors.foreach(door => {
       scene.world.addBody(door)
@@ -44,7 +44,7 @@ object Scene {
   }
 }
 
-class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = Scene.stepNumber) {
+class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, val dropSpawns: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = Scene.stepNumber) {
   val world = new World()
   world.setGravity(Vector2(0,0))
   var bodiesToRemove = collection.mutable.Set[Body]()
@@ -65,9 +65,26 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = 
     bodiesToRemove add bullet
   }
 
+  def handleDropInteraction(player: Player, drop: Drop) = {
+    player.weapon match {
+      case None =>
+        player.weapon = Some(drop.weapon)
+        bodiesToRemove add drop
+    }
+  }
+
   val listener = new CollisionListener {
+//    TODO player-drop interaction
     def internalCollisionHandler(body1: Body, body2: Body) = {
       (body1, body2) match {
+        case (player: Player, drop: Drop) =>
+          handleDropInteraction(player, drop)
+          false
+        case (drop: Drop, player: Player) =>
+          handleDropInteraction(player, drop)
+          false
+        case (_: Drop, _) | (_, _: Drop) =>
+          false
         case (_: Player, _: Bullet) =>
           handlePlayerDeath(body1, body2)
           false
@@ -124,9 +141,17 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = 
 
   def addPlayer: Player = {
     val player = Player(position = spawnPool.randomSpawn)
-    player.weapon = Random.shuffle(Shotgun() :: Pistol() :: Riffle() :: Nil).headOption
+    //    player.weapon = Random.shuffle(Shotgun() :: Pistol() :: Riffle() :: Nil).headOption
+    player.weapon = None
     world.addBody(player)
     player
+  }
+
+  def placeDrop: Drop = {
+    val weapon = Random.shuffle(Shotgun() :: Pistol() :: Riffle() :: Nil).head
+    val drop = Drop(weapon, position = dropSpawns.randomSpawn)
+    world.addBody(drop)
+    drop
   }
 
   def emitBullet(uuid: UUID): Unit = {

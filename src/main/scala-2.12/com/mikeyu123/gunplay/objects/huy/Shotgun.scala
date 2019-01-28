@@ -20,6 +20,7 @@ case class Shotgun(span: Long = Shotgun.span, bulletVelocity: Double = Shotgun.b
   var lastFired = Instant.now
 
   def emit(player: Player): Set[Bullet] = {
+//    TODO DRY main mechanics
     if(lastFired.plus(span, ChronoUnit.MILLIS).isBefore(Instant.now) && ammo > 0) {
       val bullets = Set(-Math.PI/6, -Math.PI / 3, 0d, Math.PI/6, Math.PI / 3).map(offset => {
         val bullet = new Bullet(player.getId, position =

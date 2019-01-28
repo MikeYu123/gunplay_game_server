@@ -27,7 +27,7 @@ object ClientConnectionActor {
   sealed trait ServerMessage
   case class Registered(id: UUID) extends ServerMessage
   case class Updates(
-              bodies: Set[MessageObject],
+              bodies: Set[PlayerObject],
               bullets: Set[MessageObject],
               doors: Set[MessageObject],
               player: Option[PlayerObject] = None) extends ServerMessage

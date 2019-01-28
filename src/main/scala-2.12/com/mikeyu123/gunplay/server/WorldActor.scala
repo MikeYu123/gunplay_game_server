@@ -87,7 +87,7 @@ class WorldActor(val scene: Scene) extends Actor {
       val murders = scene.step
       processMurders(murders)
       val updates: WorldUpdates = scene.updates
-      val bodyUpdates = updates.bodies.map(_.toMessageObject)
+      val bodyUpdates = updates.bodies.map(_.asInstanceOf[Player].toPlayerObject)
       val bulletUpdates = updates.bullets.map(_.toMessageObject)
       val doorUpdates = updates.doors.map(_.toMessageObject)
 //      TODO this is huevo, ideas:
@@ -100,7 +100,7 @@ class WorldActor(val scene: Scene) extends Actor {
         val (client, id) = x
         val bodyOption: Option[Body] = bodies.get(id).flatMap(uuid => updates.bodies.find(b => b.getId equals uuid))
         val pimpedBodyUpdates = bodyOption.fold(bodyUpdates)(body => {
-          (updates.bodies - body).map(_.toMessageObject)
+          (updates.bodies - body).map(_.asInstanceOf[Player].toPlayerObject)
         })
         val updatesObject = Updates(pimpedBodyUpdates, bulletUpdates, doorUpdates, bodyOption.map(_.asInstanceOf[Player].toPlayerObject))
         client ! updatesObject

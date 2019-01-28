@@ -51,6 +51,47 @@ trait BinaryProtocol {
     }
   }
 
+  implicit object PlayerObjectBinaryFormat extends BinaryFormat[PlayerObject] {
+    def encodeWeaponType(weaponType: String): Byte = weaponType match {
+      case "unarmed" => 0.toByte
+      case "pistol" => 1.toByte
+      case "shotgun" => 2.toByte
+      case "riffle" => 3.toByte
+    }
+
+    def decodeWeaponType(byte: Byte): String = byte match {
+      case 0 => "unarmed"
+      case 1 => "pistol"
+      case 2 => "shotgun"
+      case 3 => "riffle"
+    }
+
+    def encode(playerObject: PlayerObject): ByteBuffer = {
+      val result = ByteBuffer.allocate(6 * 8 + 1)
+        .putDouble(playerObject.x)
+        .putDouble(playerObject.y)
+        .putDouble(playerObject.angle)
+        .putDouble(playerObject.width)
+        .putDouble(playerObject.height)
+        .put(encodeWeaponType(playerObject.weapon))
+        .putDouble(playerObject.ammo)
+      result.flip()
+      result
+    }
+
+    def decode(byteBuffer: ByteBuffer): PlayerObject = {
+      PlayerObject(
+        byteBuffer.getDouble,
+        byteBuffer.getDouble,
+        byteBuffer.getDouble,
+        byteBuffer.getDouble,
+        byteBuffer.getDouble,
+        decodeWeaponType(byteBuffer.get),
+        byteBuffer.getDouble
+      )
+    }
+  }
+
   implicit object UpdatesBinaryFormat extends BinaryFormat[Updates] {
     def encode(updates: Updates): ByteBuffer = {
       val bodiesSize = updates.bodies.size
@@ -58,6 +99,7 @@ trait BinaryProtocol {
       val doorsSize = updates.doors.size
       val playerSize = updates.player.size
       val encode: MessageObject => ByteBuffer = MessageObjectBinaryFormat.encode
+      val playerEncode: PlayerObject => ByteBuffer = PlayerObjectBinaryFormat.encode
 
       val bodyMessages: ByteBuffer = updates.bodies.map(encode).foldLeft(ByteBuffer.allocate(bodiesSize * 40))(_.put(_))
       bodyMessages.flip()
@@ -65,8 +107,8 @@ trait BinaryProtocol {
       bulletMessages.flip()
       val doorMessages: ByteBuffer = updates.doors.map(encode).foldLeft(ByteBuffer.allocate(doorsSize * 40))(_.put(_))
       doorMessages.flip()
-      val playerMessage: ByteBuffer = updates.player.map(encode).getOrElse(ByteBuffer.allocate(0))
-      val result = ByteBuffer.allocate(17 + bodiesSize * 40 + bulletsSize * 40 + doorsSize * 40 + playerSize * 40)
+      val playerMessage: ByteBuffer = updates.player.map(playerEncode).getOrElse(ByteBuffer.allocate(0))
+      val result = ByteBuffer.allocate(17 + bodiesSize * 40 + bulletsSize * 40 + doorsSize * 40 + playerSize * 49)
         .put(2.toByte)
         .putInt(bodiesSize)
         .put(bodyMessages)
@@ -82,6 +124,7 @@ trait BinaryProtocol {
 
     def decode(byteBuffer: ByteBuffer): Updates = {
       val decode: ByteBuffer => MessageObject = MessageObjectBinaryFormat.decode
+      val playerDecode: ByteBuffer => PlayerObject = PlayerObjectBinaryFormat.decode
       byteBuffer.get
       val bodiesSize = byteBuffer.getInt
       val bodies = (1 to bodiesSize).map((_) => decode(byteBuffer)).toSet
@@ -90,7 +133,7 @@ trait BinaryProtocol {
       val doorsSize = byteBuffer.getInt
       val doors = (1 to doorsSize).map((_) => decode(byteBuffer)).toSet
       val playerSize = byteBuffer.getInt
-      val player = (1 to playerSize).map(_ => decode(byteBuffer)).headOption
+      val player = (1 to playerSize).map(_ => playerDecode(byteBuffer)).headOption
       Updates(bodies, bullets, doors, player)
     }
   }

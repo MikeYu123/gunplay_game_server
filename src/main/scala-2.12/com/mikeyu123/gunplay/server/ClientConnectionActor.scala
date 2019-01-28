@@ -10,7 +10,7 @@ import akka.http.scaladsl.model.ws.TextMessage
 import akka.util.ByteString
 import com.mikeyu123.gunplay.server.ClientConnectionActor._
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
-import com.mikeyu123.gunplay.server.messaging.{BinaryProtocol, JsonProtocol, MessageObject, ObjectsMarshaller}
+import com.mikeyu123.gunplay.server.messaging._
 import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
 import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
@@ -30,7 +30,7 @@ object ClientConnectionActor {
               bodies: Set[MessageObject],
               bullets: Set[MessageObject],
               doors: Set[MessageObject],
-              player: Option[MessageObject] = None) extends ServerMessage
+              player: Option[PlayerObject] = None) extends ServerMessage
   case class Leaderboard(entries: Seq[LeaderboardEntry] = Seq()) extends ServerMessage
 
 

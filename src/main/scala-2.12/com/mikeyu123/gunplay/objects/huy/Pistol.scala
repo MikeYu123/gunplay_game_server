@@ -14,9 +14,8 @@ object Pistol {
   val span: Long = utils.AppConfig.getLong("pistol.span")
   val ammo = utils.AppConfig.getDouble("pistol.ammo")
   val bulletVelocity = utils.AppConfig.getDouble("pistol.velocity")
-  def apply(span: Long = span, bulletVelocity: Double = bulletVelocity, ammo: Double = ammo) = new Pistol(span, bulletVelocity, ammo)
 }
-class Pistol(span: Long = Pistol.span, bulletVelocity: Double = Pistol.bulletVelocity, var ammo: Double = Pistol.ammo) extends Weapon {
+case class Pistol(span: Long = Pistol.span, bulletVelocity: Double = Pistol.bulletVelocity, var ammo: Double = Pistol.ammo) extends Weapon {
   var lastFired = Instant.now
 
   def emit(player: Player): Set[Bullet] = {

@@ -7,4 +7,5 @@ import java.util.UUID
   */
 package object messaging {
   case class MessageObject(x: Double, y: Double, angle: Double, width: Double, height: Double)
+  case class PlayerObject(x: Double, y: Double, angle: Double, width: Double, height: Double, weapon: String, ammo: Double)
 }

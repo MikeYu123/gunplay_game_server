@@ -3,7 +3,7 @@ package com.mikeyu123.gunplay.server
 import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Terminated}
-import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
+import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.{MarshallableBody, MarshallablePlayer}
 import com.mikeyu123.gunplay.objects._
 import com.mikeyu123.gunplay.objects.huy.Scene.{Murder, WorldUpdates}
 import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
@@ -84,9 +84,9 @@ class WorldActor(val scene: Scene) extends Actor {
       val murders = scene.step
       processMurders(murders)
       val updates: WorldUpdates = scene.updates
-      val bodyUpdates = updates.bodies.map(_.marshall)
-      val bulletUpdates = updates.bullets.map(_.marshall)
-      val doorUpdates = updates.doors.map(_.marshall)
+      val bodyUpdates = updates.bodies.map(_.toMessageObject)
+      val bulletUpdates = updates.bullets.map(_.toMessageObject)
+      val doorUpdates = updates.doors.map(_.toMessageObject)
 //      TODO this is huevo, ideas:
 //      1) inverted bodies collection
 //      2) some extra serialization logix
@@ -98,9 +98,9 @@ class WorldActor(val scene: Scene) extends Actor {
         val (client, id) = x
         val bodyOption: Option[Body] = bodies.get(id).flatMap(uuid => updates.bodies.find(b => b.getId equals uuid))
         val pimpedBodyUpdates = bodyOption.fold(bodyUpdates)(body => {
-          (updates.bodies - body).map(_.marshall)
+          (updates.bodies - body).map(_.toMessageObject)
         })
-        val updatesObject = Updates(pimpedBodyUpdates, bulletUpdates, doorUpdates, bodyOption.map(_.marshall))
+        val updatesObject = Updates(pimpedBodyUpdates, bulletUpdates, doorUpdates, bodyOption.map(_.asInstanceOf[Player].toPlayerObject))
         client ! updatesObject
 
         if (publishLeaderboard)

@@ -22,6 +22,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
   }
 
   implicit val messageObjectFormat = jsonFormat5(MessageObject)
+  implicit val playerObjectFormat = jsonFormat7(PlayerObject)
 
   implicit object UpdatesMessageFormat extends JsonFormat[Updates] {
     val setFormat = implicitly[JsonFormat[Set[MessageObject]]]
@@ -33,7 +34,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
         "bodies" -> setFormat.write(updates.bodies),
         "bullets" -> setFormat.write(updates.bullets),
         "doors" -> setFormat.write(updates.doors),
-        "player" -> updates.player.fold[JsValue](JsNull)(messageObjectFormat.write)
+        "player" -> updates.player.fold[JsValue](JsNull)(playerObjectFormat.write)
       )
     }
     def read(value: JsValue) = defaultFormat.read(value)

@@ -25,7 +25,7 @@ import scala.util.Random
 object Scene {
   val stepNumber = utils.AppConfig.getInt("world.stepNumber")
   case class Murder(killer: UUID, victim: UUID)
-  case class WorldUpdates(bodies: Set[Body] = Set(), bullets: Set[Body] = Set(), doors: Set[Body] = Set())
+  case class WorldUpdates(bodies: Set[Player] = Set(), bullets: Set[Body] = Set(), doors: Set[Body] = Set(), drops: Set[Drop] = Set())
   def fromLevel(level: LevelData): Scene = {
     val walls = level.walls.map { wallData =>
       new Wall(wallData.width, wallData.height, Vector2(wallData.x, wallData.y), Vector2(0,0))
@@ -175,9 +175,10 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, stepNumber: Int = 
   def updates: WorldUpdates = {
     world.getBodies.asScala.foldLeft(WorldUpdates())((acc: WorldUpdates, obj: Body) => {
       obj match {
-        case x: Player => WorldUpdates(acc.bodies + obj, acc.bullets, acc.doors)
-        case x: Bullet => WorldUpdates(acc.bodies, acc.bullets + obj, acc.doors)
-        case x: Door => WorldUpdates(acc.bodies, acc.bullets, acc.doors + obj)
+        case x: Player => WorldUpdates(acc.bodies + x, acc.bullets, acc.doors, acc.drops)
+        case x: Bullet => WorldUpdates(acc.bodies, acc.bullets + obj, acc.doors, acc.drops)
+        case x: Door => WorldUpdates(acc.bodies, acc.bullets, acc.doors + obj, acc.drops)
+        case x: Drop => WorldUpdates(acc.bodies, acc.bullets, acc.doors, acc.drops + x)
         case _ => acc
       }
     })

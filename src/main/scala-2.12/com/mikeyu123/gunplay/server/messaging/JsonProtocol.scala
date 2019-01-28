@@ -22,6 +22,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
   }
 
   implicit val messageObjectFormat = jsonFormat5(MessageObject)
+  implicit val dropObjectFormat = jsonFormat3(DropObject)
   implicit val playerObjectFormat = jsonFormat7(PlayerObject)
 
   implicit object UpdatesMessageFormat extends JsonFormat[Updates] {

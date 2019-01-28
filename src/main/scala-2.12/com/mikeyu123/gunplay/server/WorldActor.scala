@@ -63,7 +63,10 @@ class WorldActor(val scene: Scene) extends Actor {
       s ! Registered(leaderBoardEntry.id)
       val leaderboardData = leaderboard.values.toSeq.sortBy(-_.kills)
       val leaderboardObject = Leaderboard(leaderboardData)
-      s ! leaderboardObject
+      clients.keys.foreach { c =>
+        c ! leaderboardObject
+      }
+
     case UpdateControls(velocity, angle, click) =>
 //      TODO: handle shit when no uuid
       val s = sender()
@@ -91,7 +94,6 @@ class WorldActor(val scene: Scene) extends Actor {
 //      1) inverted bodies collection
 //      2) some extra serialization logix
       val leaderboardData = leaderboard.values.toSeq.sortBy(-_.kills)
-
       val publishLeaderboard = murders.nonEmpty
       val leaderboardObject = Leaderboard(leaderboardData)
       clients.foreach { x =>
@@ -106,6 +108,7 @@ class WorldActor(val scene: Scene) extends Actor {
         if (publishLeaderboard)
           client ! leaderboardObject
       }
+
     case Terminated(client) =>
 //      println(s"terminated ${clients(client)}")
 //      TODO: remove body from world
@@ -117,6 +120,12 @@ class WorldActor(val scene: Scene) extends Actor {
         scene removePlayerById body
       }
       clients -= client
+      val leaderboardData = leaderboard.values.toSeq.sortBy(-_.kills)
+      val leaderboardObject = Leaderboard(leaderboardData)
+      clients.keys.foreach { c =>
+        c ! leaderboardObject
+      }
+
     case _ =>
   }
 }

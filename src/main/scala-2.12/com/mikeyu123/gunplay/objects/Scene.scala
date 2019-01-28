@@ -70,6 +70,7 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, val dropSpawns: Sp
       case None =>
         player.weapon = Some(drop.weapon)
         bodiesToRemove add drop
+      case _ =>
     }
   }
 

@@ -128,7 +128,7 @@ trait BinaryProtocol {
       val bodiesSize = updates.bodies.size
       val bulletsSize = updates.bullets.size
       val doorsSize = updates.doors.size
-      val dropsSize = updates.doors.size
+      val dropsSize = updates.drops.size
       val playerSize = updates.player.size
       val encode: MessageObject => ByteBuffer = MessageObjectBinaryFormat.encode
       val playerEncode: PlayerObject => ByteBuffer = PlayerObjectBinaryFormat.encode
@@ -143,7 +143,7 @@ trait BinaryProtocol {
       val dropMessages: ByteBuffer = updates.drops.map(dropEncode).foldLeft(ByteBuffer.allocate(doorsSize * 17))(_.put(_))
       dropMessages.flip()
       val playerMessage: ByteBuffer = updates.player.map(playerEncode).getOrElse(ByteBuffer.allocate(0))
-      val result = ByteBuffer.allocate(17 + bodiesSize * 49 + dropsSize * 17 + bulletsSize * 40 + doorsSize * 40 + playerSize * 49)
+      val result = ByteBuffer.allocate(21 + bodiesSize * 49 + dropsSize * 17 + bulletsSize * 40 + doorsSize * 40 + playerSize * 49)
         .put(2.toByte)
         .putInt(bodiesSize)
         .put(bodyMessages)

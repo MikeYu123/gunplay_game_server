@@ -10,7 +10,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.ws.Message
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
-import com.mikeyu123.gunplay.objects.huy.Scene
+import com.mikeyu123.gunplay.objects.Scene
 import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.LevelParser
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData

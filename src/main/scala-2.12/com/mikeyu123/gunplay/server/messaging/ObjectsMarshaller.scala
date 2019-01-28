@@ -1,6 +1,7 @@
 package com.mikeyu123.gunplay.server.messaging
 
-import com.mikeyu123.gunplay.objects.huy.{Pistol, Player, Riffle, Shotgun}
+import com.mikeyu123.gunplay.objects.Player
+import com.mikeyu123.gunplay.objects.huy.{Player, Riffle, Shotgun}
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.{Geometry, Rectangle}

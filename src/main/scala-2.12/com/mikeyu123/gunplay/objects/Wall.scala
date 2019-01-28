@@ -1,4 +1,4 @@
-package com.mikeyu123.gunplay.objects.huy
+package com.mikeyu123.gunplay.objects
 
 import java.util.UUID
 

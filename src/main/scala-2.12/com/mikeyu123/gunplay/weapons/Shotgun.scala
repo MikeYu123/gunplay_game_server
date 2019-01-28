@@ -1,8 +1,9 @@
-package com.mikeyu123.gunplay.objects.huy
+package com.mikeyu123.gunplay.weapons
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import com.mikeyu123.gunplay.objects.{Bullet, Player}
 import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.Vector2
 

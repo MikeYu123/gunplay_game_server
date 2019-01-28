@@ -1,16 +1,17 @@
-package com.mikeyu123.gunplay.objects.huy
+package com.mikeyu123.gunplay.objects
 
 import java.util.UUID
 
 import com.mikeyu123.gunplay.objects._
-import com.mikeyu123.gunplay.objects.huy.Door.Pin
-import com.mikeyu123.gunplay.objects.huy.Scene.{Murder, WorldUpdates}
+import Door.Pin
+import Scene.{Murder, WorldUpdates}
 import com.mikeyu123.gunplay.server.ClientConnectionActor.Updates
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.MarshallableBody
 import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
 import com.mikeyu123.gunplay.utils.{SpawnPool, Vector2}
+import com.mikeyu123.gunplay.weapons.{Pistol, Riffle, Shotgun}
 import org.dyn4j.collision.manifold.Manifold
 import org.dyn4j.collision.narrowphase.Penetration
 

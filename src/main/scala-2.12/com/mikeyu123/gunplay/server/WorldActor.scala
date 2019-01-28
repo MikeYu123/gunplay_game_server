@@ -5,8 +5,8 @@ import java.util.UUID
 import akka.actor.{Actor, ActorRef, Terminated}
 import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.{MarshallableBody, MarshallablePlayer}
 import com.mikeyu123.gunplay.objects._
-import com.mikeyu123.gunplay.objects.huy.Scene.{Murder, WorldUpdates}
-import com.mikeyu123.gunplay.objects.huy.{Player, Scene}
+import Scene.{Murder, WorldUpdates}
+import com.mikeyu123.gunplay.objects.huy.Scene
 import com.mikeyu123.gunplay.server.ClientConnectionActor.{Leaderboard, Registered, Updates}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject

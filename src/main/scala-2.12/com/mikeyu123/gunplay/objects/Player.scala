@@ -1,4 +1,4 @@
-package com.mikeyu123.gunplay.objects.huy
+package com.mikeyu123.gunplay.objects
 
 import java.util.UUID
 
@@ -7,6 +7,7 @@ import org.dyn4j.geometry.{Geometry, MassType}
 import Player.{defaultHeight, defaultWidth}
 import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.Vector2
+import com.mikeyu123.gunplay.weapons.Weapon
 
 /**
   * Created by mihailurcenkov on 13.07.17.

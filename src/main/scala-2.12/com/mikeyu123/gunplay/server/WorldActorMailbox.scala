@@ -10,4 +10,5 @@ class WorldActorMailbox(settings: Settings, config: Config) extends UnboundedSta
   case Step => 0
   case AddPlayer(_) => 1
   case Terminated(_) => 2
+  case SpawnDrop => 4
 })

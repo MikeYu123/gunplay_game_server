@@ -84,6 +84,13 @@ class WorldActor(val scene: Scene) extends Actor {
           }
       }
 
+    case DropWeapon =>
+      val s = sender()
+      for {
+        client <- clients get s
+        uuid <- bodies get client
+      } scene.dropWeapon(uuid)
+
     case Step =>
       val murders = scene.step
       processMurders(murders)

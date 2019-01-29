@@ -7,8 +7,9 @@ import com.typesafe.config.Config
 
 class WorldActorMailbox(settings: Settings, config: Config) extends UnboundedStablePriorityMailbox(PriorityGenerator {
   case UpdateControls(_,_,_) => 3
+  case DropWeapon => 4
   case Step => 0
   case AddPlayer(_) => 1
   case Terminated(_) => 2
-  case SpawnDrop => 4
+  case SpawnDrop => 5
 })

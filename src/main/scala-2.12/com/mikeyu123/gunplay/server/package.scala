@@ -24,6 +24,7 @@ package object server {
   case class AddPlayer(name: String)
 // [[ClientConnectionActor]] sent message to [WorldActor] to modify body controls
   case class UpdateControls(velocity: Vector2, angle: Double, click: Boolean)
+  case object DropWeapon
   case object EmitBullet
   case object Step
   case object SpawnDrop

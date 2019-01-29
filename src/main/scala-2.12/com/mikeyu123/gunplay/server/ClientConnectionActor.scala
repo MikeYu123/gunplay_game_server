@@ -80,9 +80,11 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
       message match {
         case controls: Controls =>
 //            TODO this fails if message is broken
-            val (velocity: Vector2, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
-            val messageToSend: UpdateControls = UpdateControls(velocity, angle, click)
-            worldActor ! messageToSend
+          val (velocity, angle, click, space) = ControlsParser.parseControls(controls)
+          val messageToSend: UpdateControls = UpdateControls(velocity, angle, click)
+          worldActor ! messageToSend
+          if (space)
+            worldActor ! DropWeapon
         case Register(name) =>
 //          TODO REWORK THIS WHOLE
           connectionType = Some(JsonConnection)
@@ -96,9 +98,11 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
       message match {
         case controls: Controls =>
           //            TODO this fails if message is broken
-          val (velocity: Vector2, angle: Double, click: Boolean) = ControlsParser.parseControls(controls)
+          val (velocity, angle, click, space) = ControlsParser.parseControls(controls)
           val messageToSend: UpdateControls = UpdateControls(velocity, angle, click)
           worldActor ! messageToSend
+          if (space)
+            worldActor ! DropWeapon
         case Register(name) =>
           //          TODO REWORK THIS WHOLE
           connectionType = Some(BinaryConnection)

@@ -158,11 +158,20 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, val dropSpawns: Sp
     drops.get(spawn) match {
       case Some(drop) => drop
       case None =>
-        val drop = Drop(weapon, position = dropSpawns.randomSpawn)
+        val drop = Drop(weapon, position = spawn)
         drops.put(spawn, drop)
         world.addBody(drop)
         drop
     }
+  }
+
+  def dropWeapon(uuid: UUID): Unit = {
+    world.getBodies.asScala.find {
+      body =>
+        body.getId.equals(uuid)
+    }.foreach(player =>
+      player.asInstanceOf[Player].weapon = None
+    )
   }
 
   def emitBullet(uuid: UUID): Unit = {

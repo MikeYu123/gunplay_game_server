@@ -16,6 +16,7 @@ import com.mikeyu123.gunplay.utils.LevelParser
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.typesafe.config.ConfigFactory
+import scala.concurrent.duration._
 
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
@@ -27,9 +28,11 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
   val clientMessagePoolSize = utils.AppConfig.getInt("server.clientMessagePoolSize")
   val stepTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.step.stepTimeout").getNano)
   val initialStep = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.step.initialStep").getNano)
-  val spawnTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.spawnDrops.spawnTimeout").getNano)
+//  Dunno why this doesnt do
+//val spawnTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.spawnDrops.spawnTimeout").getNano)
   val initialSpawn = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.spawnDrops.initialSpawn").getNano)
   implicit val system = ActorSystem()
+  import system.dispatcher
   implicit val materializer = ActorMaterializer()
   val levels = ConfigFactory.load("levels").as[List[LevelData]]("levels")
   val worldActor = system.actorOf(Props(classOf[WorldActor], Scene.fromLevel(levels(0))).withMailbox("world-actor-mailbox"))
@@ -66,7 +69,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val bindingFuture =
       Http().bindAndHandle(route, interface, port)
 
-    import system.dispatcher
+//    import system.dispatcher
 
 //    val cancellable =
       system.scheduler.schedule(
@@ -78,7 +81,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
 //    val cancellable =
       system.scheduler.schedule(
         initialSpawn,
-        spawnTimeout,
+        10 seconds,
         worldActor,
         SpawnDrop)
   }

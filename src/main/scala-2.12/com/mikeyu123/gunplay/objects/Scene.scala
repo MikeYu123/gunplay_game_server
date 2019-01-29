@@ -49,6 +49,8 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, val dropSpawns: Sp
   world.setGravity(Vector2(0,0))
   var bodiesToRemove = collection.mutable.Set[Body]()
   val murders = collection.mutable.Set[Murder]()
+//  FIXME this is kostyl
+  val drops = collection.mutable.Map[Vector2, Drop]()
 
 
   def handlePlayerDeath(player: Body, bullet: Body) = {
@@ -70,6 +72,8 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, val dropSpawns: Sp
       case None =>
         player.weapon = Some(drop.weapon)
         bodiesToRemove add drop
+        val translation = drop.getTransform.getTranslation()
+        drops.remove(Vector2(translation.x, translation.y))
       case _ =>
     }
   }
@@ -150,9 +154,15 @@ class Scene(val spawnPool: SpawnPool = SpawnPool.defaultPool, val dropSpawns: Sp
 
   def placeDrop: Drop = {
     val weapon = Random.shuffle(Shotgun() :: Pistol() :: Riffle() :: Nil).head
-    val drop = Drop(weapon, position = dropSpawns.randomSpawn)
-    world.addBody(drop)
-    drop
+    val spawn = dropSpawns.randomSpawn
+    drops.get(spawn) match {
+      case Some(drop) => drop
+      case None =>
+        val drop = Drop(weapon, position = dropSpawns.randomSpawn)
+        drops.put(spawn, drop)
+        world.addBody(drop)
+        drop
+    }
   }
 
   def emitBullet(uuid: UUID): Unit = {

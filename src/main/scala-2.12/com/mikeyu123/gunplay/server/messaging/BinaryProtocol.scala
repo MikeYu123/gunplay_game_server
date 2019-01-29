@@ -280,7 +280,8 @@ trait BinaryProtocol {
         (if (controls.down) 2 else 0) +
         (if (controls.right) 4 else 0) +
         (if (controls.left) 8 else 0) +
-        (if (controls.click) 16 else 0)).toByte
+        (if (controls.click) 16 else 0) +
+        (if (controls.space) 32 else 0)).toByte
       val result = ByteBuffer.allocate(10)
           .put(2.toByte)
           .put(controlsByte)
@@ -297,8 +298,9 @@ trait BinaryProtocol {
       val right = (controlsByte / 4) % 2 == 1
       val left = (controlsByte / 8) % 2 == 1
       val click = (controlsByte / 16) % 2 == 1
+      val space = (controlsByte / 32) % 2 == 1
       val angle = byteBuffer.getDouble
-      Controls(up,down, left, right, angle, click)
+      Controls(up,down, left, right, angle, click, space)
     }
   }
 

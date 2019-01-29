@@ -76,7 +76,7 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
   }
 
   implicit object ControlsFormat extends JsonFormat[Controls] {
-    val defaultFormat = jsonFormat6(Controls)
+    val defaultFormat = jsonFormat7(Controls)
     def read(json: JsValue): Controls = defaultFormat.read(json)
     def write(controls: Controls) = {
       JsObject(
@@ -86,7 +86,8 @@ trait JsonProtocol extends DefaultJsonProtocol with UuidMarshalling {
         "right" -> JsBoolean(controls.right),
         "left" -> JsBoolean(controls.left),
         "click" -> JsBoolean(controls.click),
-        "angle" -> JsNumber(controls.angle)
+        "angle" -> JsNumber(controls.angle),
+        "space" -> JsBoolean(controls.space)
       )
     }
   }

@@ -42,7 +42,8 @@ object ClientConnectionActor {
                       left: Boolean,
                       right: Boolean,
                       angle: Double,
-                      click: Boolean) extends ClientMessage
+                      click: Boolean,
+                      space: Boolean) extends ClientMessage
 
   sealed trait ConnectionType
   case object BinaryConnection extends ConnectionType
@@ -73,6 +74,7 @@ class ClientConnectionActor(worldActor: ActorRef) extends Actor with BinaryProto
 //    Here we take incoming messages
 //      TODO: check whether there might be binary messages
 //      TODO: move deserializers to separate layer
+//      TODO handle exceptions
     case TextMessage.Strict(t) =>
       val message: ClientMessage = t.parseJson.convertTo[ClientMessage]
       message match {

@@ -17,8 +17,6 @@ import com.mikeyu123.gunplay.utils.LevelParser.LevelData
 import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.typesafe.config.ConfigFactory
 
-import scala.concurrent.duration._
-import scala.io.StdIn
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 
@@ -27,8 +25,10 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
   val interface = utils.AppConfig.getString("server.interface")
   val port = utils.AppConfig.getInt("server.port")
   val clientMessagePoolSize = utils.AppConfig.getInt("server.clientMessagePoolSize")
-  val stepTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.stepTimeout").getNano)
-  val initialStep = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.initialStep").getNano)
+  val stepTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.step.stepTimeout").getNano)
+  val initialStep = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.step.initialStep").getNano)
+  val spawnTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.spawnDrops.spawnTimeout").getNano)
+  val initialSpawn = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.spawnDrops.initialSpawn").getNano)
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   val levels = ConfigFactory.load("levels").as[List[LevelData]]("levels")
@@ -77,8 +77,8 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
 
 //    val cancellable =
       system.scheduler.schedule(
-        0 milliseconds,
-        100 seconds,
+        initialSpawn,
+        spawnTimeout,
         worldActor,
         SpawnDrop)
   }

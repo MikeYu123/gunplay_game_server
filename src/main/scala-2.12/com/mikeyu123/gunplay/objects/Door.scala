@@ -32,7 +32,7 @@ class Door(width: Double = defaultWidth,
   setLinearVelocity(velocity)
   translate(position)
   setAngularVelocity(0.0)
-  setAngularDamping(.2)
+  setAngularDamping(.3)
   setMass(MassType.NORMAL)
   val joint = new RevoluteJoint(this, pin, Vector2(pin.x, pin.y))
   joint.setLimitEnabled(true)

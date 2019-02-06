@@ -36,6 +36,7 @@ class Ws(actorSystem: ActorSystem, levelCollection: MongoCollection[Level], redi
     val in = Sink.actorRef(c, ConnectionClose)
 
     val out = Source.actorRef(clientMessagePoolSize, OverflowStrategy.fail).mapMaterializedValue { a =>
+//      TODO pass some data to register user
       c ! RegisterConnection(a)
       a
     }
@@ -47,7 +48,7 @@ class Ws(actorSystem: ActorSystem, levelCollection: MongoCollection[Level], redi
     get {
       cookie("sessid") { sessionId =>
         val flowFuture = for {
-          roomId <- redisClient.hget[String]("session_$sessionId", "roomId")
+          roomId <- redisClient.hget[String](s"session_$sessionId", "roomId")
           worldActor <- worldActorFuture(roomId.get)
         } yield flow(worldActor)
         onComplete(flowFuture) {

@@ -13,8 +13,8 @@ package object models {
 
   sealed trait MongoModel
   case class Level(data: LevelData, _id: ObjectId = ObjectId.get) extends MongoModel
-  case class Room(players: Set[ObjectId], capacity: Int, level: ObjectId, _id: ObjectId = ObjectId.get) extends MongoModel
-  case class User(_id: ObjectId, email: String, passwordHash: String, username: Option[String], avatar: Option[String]) extends MongoModel
+  case class Room(capacity: Int, level: ObjectId, _id: ObjectId = ObjectId.get, players: Set[ObjectId] = Set()) extends MongoModel
+  case class User(email: String, passwordHash: String, username: Option[String] = None, avatar: Option[String] = None, _id: ObjectId = ObjectId.get) extends MongoModel
 
 
   val codecRegistry =

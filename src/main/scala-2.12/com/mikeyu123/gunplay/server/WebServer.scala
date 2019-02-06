@@ -58,7 +58,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val route = get {
       akka.http.scaladsl.server.Directives.handleWebSocketMessages(flow)
     } ~
-      path("levels" / IntNumber) { index =>
+      path("levels" / Segment) { index =>
         get {
           respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")){
             complete(levels(0))

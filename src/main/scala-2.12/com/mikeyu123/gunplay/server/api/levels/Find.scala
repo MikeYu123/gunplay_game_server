@@ -21,7 +21,7 @@ class Find(actorSystem: ActorSystem, levelCollection: MongoCollection[Level]) ex
 
   val route = {
     get {
-      path("level" / Segment) { levelId =>
+      path("levels" / Segment) { levelId =>
         val levelFuture = for {
           level <- levelCollection.find(equal("_id", new ObjectId(levelId))).first.head
         } yield level.data

@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.ws.Message
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.util.Timeout
 import com.mikeyu123.gunplay.db.models.{Level, Room}
 import com.mikeyu123.gunplay.objects.Scene
 import com.mikeyu123.gunplay.server.{ClientConnectionActor, ConnectionClose, RegisterConnection, WorldActor}
@@ -23,7 +24,7 @@ import scala.util.{Failure, Success}
 object Ws {
   case class RoomCreated(room: Room, status: String = "ok")
 }
-class Ws(actorSystem: ActorSystem, levelCollection: MongoCollection[Level], redisClient: RedisClient) extends RoutingObject with SprayJsonSupport with ApiProtocol {
+class Ws(actorSystem: ActorSystem, levelCollection: MongoCollection[Level], redisClient: RedisClient)(implicit timeout: Timeout) extends RoutingObject with SprayJsonSupport with ApiProtocol {
   import actorSystem.dispatcher
 
   def worldActorFuture(worldId: String) = actorSystem.actorSelection(worldId).resolveOne
@@ -45,7 +46,7 @@ class Ws(actorSystem: ActorSystem, levelCollection: MongoCollection[Level], redi
   }
 
   val route = {
-    get {
+    (get & path("ws")) {
       cookie("sessid") { sessionId =>
         val flowFuture = for {
           roomId <- redisClient.hget[String](s"session_$sessionId", "roomId")

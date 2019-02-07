@@ -3,11 +3,12 @@ package com.mikeyu123.gunplay.server
 import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Terminated}
-import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.{MarshallableBody, MarshallablePlayer, MarchallableDrop}
+import com.mikeyu123.gunplay.server.messaging.ObjectsMarshaller.{MarchallableDrop, MarshallableBody, MarshallablePlayer}
 import com.mikeyu123.gunplay.objects._
 import Scene.{Murder, WorldUpdates}
 import com.mikeyu123.gunplay.objects.Scene
 import com.mikeyu123.gunplay.server.ClientConnectionActor.{Leaderboard, Registered, Updates}
+import com.mikeyu123.gunplay.server.WebServer.{initialSpawn, initialStep, stepTimeout, system}
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay.utils
@@ -15,6 +16,7 @@ import com.mikeyu123.gunplay.utils.SpawnPool
 import com.mikeyu123.gunplay_physics.structs.Point
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Vector2
+import scala.concurrent.duration._
 
 /**
   * Created by mihailurcenkov on 25.07.17.
@@ -23,6 +25,11 @@ import org.dyn4j.geometry.Vector2
 object WorldActor {
   val defaultName = utils.AppConfig.getString("leaderboard.defaultName")
   case class LeaderboardEntry(id: UUID = UUID.randomUUID, name: String = defaultName, kills: Int = 0, deaths: Int = 0)
+  val stepTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.step.stepTimeout").getNano)
+  val initialStep = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.step.initialStep").getNano)
+  //  Dunno why this doesnt do
+  //val spawnTimeout = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.spawnDrops.spawnTimeout").getNano)
+  val initialSpawn = scala.concurrent.duration.Duration.fromNanos(utils.AppConfig.getDuration("server.spawnDrops.initialSpawn").getNano)
 }
 
 class WorldActor(val scene: Scene) extends Actor {
@@ -140,5 +147,20 @@ class WorldActor(val scene: Scene) extends Actor {
       }
 
     case _ =>
+  }
+  override def preStart() {
+    implicit val ec = context.system.dispatcher
+    context.system.scheduler.schedule(
+      WorldActor.initialStep,
+      WorldActor.stepTimeout,
+      self,
+      Step)
+
+    //    val cancellable =
+    context.system.scheduler.schedule(
+      WorldActor.initialSpawn,
+      5 seconds,
+      self,
+      SpawnDrop)
   }
 }

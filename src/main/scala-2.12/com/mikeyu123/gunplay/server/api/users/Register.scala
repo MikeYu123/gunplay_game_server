@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.{DateTime, StatusCodes}
 import akka.http.scaladsl.model.headers.HttpCookie
+import akka.util.Timeout
 import com.mikeyu123.gunplay.db.models.{Room, User}
 import com.mikeyu123.gunplay.server.api.users.Login.{LoginForm, UserData}
 import com.mikeyu123.gunplay.server.api.users.Register.RegisterForm
@@ -22,13 +23,8 @@ import scala.util.{Failure, Success}
 
 object Register {
   case class RegisterForm(email: String, password: String, passwordConfirmation: String)
-  object UserData {
-    def apply(user: User) =
-      UserData(user.email, user.username, user.avatar)
-  }
-  case class UserData(email: String, username: Option[String] = None, avatar: Option[String] = None)
 }
-class Register(actorSystem: ActorSystem, userCollection: MongoCollection[User], redisClient: RedisClient)(implicit bcrypt: Bcrypt) extends RoutingObject with SprayJsonSupport with ApiProtocol {
+class Register(actorSystem: ActorSystem, userCollection: MongoCollection[User], redisClient: RedisClient)(implicit bcrypt: Bcrypt, timeout: Timeout) extends RoutingObject with SprayJsonSupport with ApiProtocol {
   import actorSystem.dispatcher
 
   val route = {
@@ -43,8 +39,9 @@ class Register(actorSystem: ActorSystem, userCollection: MongoCollection[User], 
               case Success(_) =>
                 val session = Session(SessionData(user._id))
                 val expires = DateTime.now + 1.hour.length
-                setCookie(HttpCookie("sessid", session.id.toString, expires = Some(expires)))
-                complete(redisClient.hmset(s"session_${session.id}", session.data.toMap).map((_) => UserData(user)))
+                setCookie(HttpCookie("sessid", session.id.toString, expires = Some(expires))) {
+                  complete(redisClient.hmset(s"session_${session.id}", session.data.toMap).map((_) => UserData(user)))
+                }
             }
           }
           else

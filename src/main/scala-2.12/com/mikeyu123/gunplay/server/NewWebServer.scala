@@ -42,7 +42,7 @@ object NewWebServer extends App with LevelParser with SprayJsonSupport {
     val redisClient = RedisClient("localhost")
   implicit val timeout = Timeout(5 seconds)
 
-    val route =           respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")) {
+    val route = respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")) {
       (new Ws(system, MongoManager.levelsCollection, redisClient) +
         new Find(system, MongoManager.levelsCollection) +
         new Create(system, MongoManager.levelsCollection, MongoManager.roomsCollection) +

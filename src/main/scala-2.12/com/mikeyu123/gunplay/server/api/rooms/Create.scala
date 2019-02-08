@@ -24,12 +24,14 @@ class Create(actorSystem: ActorSystem, levelCollection: MongoCollection[Level], 
 
   val route = {
     (post & path("room")) {
-      entity(as[CreateRoom]) { roomData =>
-        complete(levelCollection.find(equal("_id", roomData.level)).first().head.flatMap { level =>
-          val room = Room(roomData.capacity, roomData.level)
-          actorSystem.actorOf(Props(classOf[WorldActor], Scene.fromLevel(level.data)).withMailbox("world-actor-mailbox"), room._id.toString)
-          roomCollection.insertOne(room).head.map(_ => RoomCreated(room).toJson)
-        })
+      cookie("sessId") { sessionId =>
+        entity(as[CreateRoom]) { roomData =>
+          complete(levelCollection.find(equal("_id", roomData.level)).first().head.flatMap { level =>
+            val room = Room(roomData.capacity, roomData.level)
+            actorSystem.actorOf(Props(classOf[WorldActor], Scene.fromLevel(level.data)).withMailbox("world-actor-mailbox"), room._id.toString)
+            roomCollection.insertOne(room).head.map(_ => RoomCreated(room).toJson)
+          })
+        }
       }
     }
   }

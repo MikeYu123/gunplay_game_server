@@ -14,7 +14,6 @@ import com.mikeyu123.gunplay.objects.Scene
 import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.LevelParser
 import com.mikeyu123.gunplay.utils.LevelParser.LevelData
-import com.mikeyu123.gunplay_physics.objects.PhysicsObject
 import com.typesafe.config.ConfigFactory
 import scala.concurrent.duration._
 
@@ -58,7 +57,7 @@ object WebServer extends App with LevelParser with SprayJsonSupport {
     val route = get {
       akka.http.scaladsl.server.Directives.handleWebSocketMessages(flow)
     } ~
-      path("levels" / IntNumber) { index =>
+      path("levels" / Segment) { index =>
         get {
           respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")){
             complete(levels(0))

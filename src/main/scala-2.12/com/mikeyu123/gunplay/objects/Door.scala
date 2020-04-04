@@ -28,8 +28,8 @@ class Door(width: Double = defaultWidth,
            height: Double = defaultHeight,
            position: Vector2 = Vector2(0, 0),
            velocity: Vector2 = Vector2(0, 0),
-           damping: Double = defaultDamping,
-           val pin: Pin) extends Body{
+           val pin: Pin,
+           damping: Double = defaultDamping) extends Body{
   addFixture(Geometry.createRectangle(width, height))
   setLinearVelocity(velocity)
   translate(position)

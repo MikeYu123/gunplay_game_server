@@ -12,10 +12,8 @@ import com.mikeyu123.gunplay.server.ClientConnectionActor._
 import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging._
 import com.mikeyu123.gunplay.utils
-import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
-import com.mikeyu123.gunplay_physics.structs.{Point, Vector}
 import spray.json._
-
+import com.mikeyu123.gunplay.utils.{ControlsParser, SpawnPool, Vector2}
 import scala.util.Try
 
 /**

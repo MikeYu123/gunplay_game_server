@@ -3,12 +3,8 @@ package com.mikeyu123.gunplay
 import java.util.UUID
 
 import akka.actor.ActorRef
-import com.mikeyu123.gunplay.server.ClientConnectionActor.Updates
-import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
-import com.mikeyu123.gunplay.server.messaging.MessageObject
+
 import com.mikeyu123.gunplay.utils.Vector2
-import com.mikeyu123.gunplay_physics.structs.Vector
-import spray.json.JsValue
 
 /**
   * Created by mihailurcenkov on 06.08.17.

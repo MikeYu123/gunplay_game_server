@@ -13,7 +13,6 @@ import com.mikeyu123.gunplay.server.WorldActor.LeaderboardEntry
 import com.mikeyu123.gunplay.server.messaging.MessageObject
 import com.mikeyu123.gunplay.utils
 import com.mikeyu123.gunplay.utils.SpawnPool
-import com.mikeyu123.gunplay_physics.structs.Point
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Vector2
 

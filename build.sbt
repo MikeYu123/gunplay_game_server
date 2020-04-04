@@ -3,10 +3,7 @@ name := "gunplay_from_scratch"
 version := "1.0"
 
 scalaVersion := "2.12.2"
-lazy val gunplayPhysics = {
-  RootProject(uri("git://github.com/MikeYu123/gunplay_physics.git"))
-}
-lazy val root = (project in file(".")).dependsOn(gunplayPhysics)
+
 val akkaHttpVersion = "10.0.7"
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
@@ -24,4 +21,5 @@ libraryDependencies ++= Seq(
   "org.mindrot" % "jbcrypt" % "0.3m"
 )
 
+mainClass in assembly := Some("com.mikeyu123.gunplay.server.WebServer")
 
